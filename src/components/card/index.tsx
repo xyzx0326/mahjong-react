@@ -1,37 +1,39 @@
 import pai from '@/assets/card/pai.gif';
 import {BoardSizeType} from "@/config/board";
-import cards from "@/config/card";
+import cards, {cardLib} from "@/config/card";
 
 import Konva from "konva";
 import React, {useRef} from 'react';
 import {Group, Image as KImage} from "react-konva";
 
 type CardProps = {
-    num: number; // 当前棋子
+    num: number;
+    card: number;
     x: number;
     y: number;
     boardSize: BoardSizeType;
     seatIndex: number;
     direction?: number;
     isSelect?: boolean;
-    onClick?: () => void;
+    onSelect?: (num: number) => void;
 }
 
 const Card: React.FC<CardProps> = ({
                                        num,
+                                       card,
                                        x, y,
                                        boardSize,
                                        seatIndex,
                                        direction = 0,
                                        isSelect,
-                                       onClick
+                                       onSelect
                                    }) => {
     const nodeRef = useRef<Konva.Group>(null);
     const {cardWidth, cardHeight} = boardSize;
 
 
     const image = new Image();
-    image.src = seatIndex !== 0 || (direction & 2) === 2 ? pai : cards[num];
+    image.src = seatIndex !== 0 || (direction & 2) === 2 ? pai : cards[card];
 
 
     const xOffset = (Math.floor(seatIndex / 2) - 0.5) * 2;
@@ -42,8 +44,8 @@ const Card: React.FC<CardProps> = ({
             ref={nodeRef}
             x={x}
             y={isSelect ? (y - 0.4 * cardWidth) : y}
-            onClick={onClick}
-            onTap={onClick}
+            onClick={() => onSelect && onSelect(num)}
+            onTap={() => onSelect && onSelect(num)}
         >
             <KImage
                 image={image}

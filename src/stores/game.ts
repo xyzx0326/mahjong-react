@@ -2,31 +2,26 @@ import {defaultRule, Rule} from "@/config/rules";
 import {CACHE_RULE_KEY, CacheUtils} from "@/utils";
 import {createSlice} from '@reduxjs/toolkit'
 
-export type CardType = {
-    num: number;
-    direction?: number;
-};
-
-export type GridData = { rowIndex: number; colIndex: number };
+export type CardType = { num: number; card: number, direction?: number; };
 
 export type Player = {
     index: number;
-    enter?: CardType;
+    score: number;
     cards: CardType[];
+
+    outer: CardType[];
     immovable: CardType[][];
     select?: number;
     isWin?: boolean;
     isRound?: boolean;
+    enter?: CardType;
 }
 
 export type GameFrameData = {
     steps: number; // 步数
     players: Player[]
-    selfIsWhite?: boolean; // 自己是白方
-    stepIsWhite?: boolean;// 轮到白方走棋
-    onlyOnePieceStep?: number;// 某方只剩一个棋子，大于0表示白方，小于0表示黑方，绝对值表示步数
+    currentIndex: number,
     gameIsEnd?: boolean;// 游戏是否结束
-    selectGrid: GridData | undefined,
     rule: Rule
 };
 
@@ -34,43 +29,52 @@ const cacheRule = CacheUtils.getItem(CACHE_RULE_KEY, defaultRule);
 
 const initialState = {
     steps: 0,
+    currentIndex: 0,
     players: [{
         index: 0,
-        enter: {num: 29},
-        cards: [{num: 1}, {num: 1}, {num: 1}, {num: 9}, {num: 9}, {num: 9}, {num: 29}],
-        immovable: [[{num: 19}, {num: 19, direction: 1}, {num: 19}], [{
-            num: 11,
-            direction: 2
-        }, {num: 11}, {num: 11}, {num: 11, direction: 2}]],
+        cards: [],
+        outer: [
+            {num: 1, card: 0},
+            {num: 1, card: 1},
+            {num: 1, card: 2},
+            {num: 1, card: 3},
+            {num: 2, card: 4},
+            {num: 2, card: 5}
+        ],
+        immovable: [],
         isWin: false,
         select: 1,
-        isRound: true
+        isRound: true,
+        score: 25000,
     }, {
         index: 1,
-        cards: [{num: 1}, {num: 1}, {num: 1}, {num: 9}, {num: 9}, {num: 9}, {num: 29}, {num: 29}],
-        immovable: [[{num: 19}, {num: 19, direction: 1}, {num: 19}], [{num: 11, direction: 1}, {num: 11}, {num: 11}]],
+        cards: [],
+        outer: [],
+        immovable: [],
         isWin: false,
-        isRound: true
+        isRound: true,
+        score: 25000,
     }, {
         index: 2,
-        cards: [{num: 1}, {num: 1}, {num: 1}, {num: 9}, {num: 9}, {num: 9}, {num: 29}, {num: 29}],
-        immovable: [[{num: 19}, {num: 19, direction: 1}, {num: 19}], [{num: 11, direction: 1}, {num: 11}, {num: 11}]],
+        cards: [],
+        outer: [],
+        immovable: [],
         isWin: false,
-        isRound: true
+        isRound: true,
+        score: 25000,
     }, {
         index: 3,
-        cards: [{num: 1}, {num: 1}, {num: 1}, {num: 9}, {num: 9}, {num: 9}, {num: 29}, {num: 29}],
-        immovable: [[{num: 19}, {num: 19, direction: 1}, {num: 19}], [{num: 11, direction: 1}, {num: 11}, {num: 11}]],
+        cards: [],
+        outer: [],
+        immovable: [],
         isWin: false,
-        isRound: true
+        isRound: true,
+        score: 25000,
     }],
     selfIsWhite: false,
     stepIsWhite: false,
     gameIsEnd: false,
-    onlyShow: false,
 
-    otherSideOnline: false,
-    selectGrid: undefined,
     rule: cacheRule, //规则
 } as GameFrameData
 
@@ -84,7 +88,6 @@ export const gameSlice = createSlice({
          */
         handleRestart(state) {
             state.gameIsEnd = false;
-            state.stepIsWhite = false;
             state.steps = 0;
         },
 

@@ -1,12 +1,11 @@
-import {Card} from "@/components";
 import {boardScale, BoardSizeType} from "@/config/board";
 import {Player} from "@/stores/game";
-import React from "react";
+import React, {useMemo} from "react";
 import {Group, Layer} from "react-konva";
+import Card from "../card";
 
 export type SeatProps = {
     player: Player
-    board: number
     boardSize: BoardSizeType
     onCardSelect?: (index: number) => void;
 }
@@ -41,7 +40,9 @@ const seat = (board: number, boardSize: BoardSizeType) => {
 }
 
 
-const Seat: React.FC<SeatProps> = ({player, board, boardSize}) => {
+const Seat: React.FC<SeatProps> = ({player, boardSize, onCardSelect}) => {
+    const {width, height, direction} = boardSize
+    const board = direction === 1 ? height : width;
     const {cards, immovable, enter} = player;
     const seatIndex = player.index;
     const scale = seatIndex === 0 ? 1 : 0.8
@@ -51,18 +52,19 @@ const Seat: React.FC<SeatProps> = ({player, board, boardSize}) => {
     const immovableCard = immovableBoard;
     const {xEdge, yEdge, rotation} = seat(board, scaleBoard)[seatIndex]
 
-    let immovableWeight = immovable.reduce((value: number, cards) => {
+    let immovableWeight = useMemo(() => immovable.reduce((value: number, cards) => {
         return value + cards.reduce((value: number, card) => {
             const add = (card.direction === 1) ? immovableCard.cardHeight : immovableCard.cardWidth
             return value + add;
         }, 0)
-    }, 0);
+    }, 0), [immovable]);
 
     const immovableCards = immovable.map((cards, index) => {
         return <Group y={cardHeight - immovableCard.cardHeight}>
             {cards.map((card, index) => {
                 const ret = <Card key={index}
                                   num={card.num}
+                                  card={card.card}
                                   x={board - immovableWeight - boardEdge}
                                   y={0}
                                   boardSize={immovableBoard}
@@ -83,22 +85,24 @@ const Seat: React.FC<SeatProps> = ({player, board, boardSize}) => {
             {cards.map((card, index) => {
                 return <Card key={index}
                              num={card.num}
+                             card={card.card}
                              x={index * cardWidth}
                              y={0}
                              boardSize={scaleBoard}
                              seatIndex={seatIndex}
-                             onClick={() => {
-                             }}
+                             onSelect={onCardSelect}
                              isSelect={index === player.select}
                              direction={card.direction}
                 />;
             })}
             {
                 enter ? <Card num={enter.num}
+                              card={enter.card}
                               x={(cards.length + 0.5) * cardWidth}
                               y={0}
                               boardSize={scaleBoard}
                               seatIndex={seatIndex}
+                              onSelect={onCardSelect}
                               isSelect={cards.length === player.select}
                               direction={enter.direction}
                 /> : null

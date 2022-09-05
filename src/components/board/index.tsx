@@ -1,6 +1,5 @@
 import white from "@/assets/test2.gif";
 import {BoardSizeType} from "@/config/board";
-import {GridData} from "@/stores/game";
 import "gifler";
 import Konva from "konva";
 import React, {useEffect} from 'react';
@@ -9,7 +8,6 @@ import {Group, Image as KImage, Layer, Rect} from "react-konva";
 
 type BoardProps = {
     boardSize: BoardSizeType;
-    selectGrid: GridData | undefined;
 }
 
 
