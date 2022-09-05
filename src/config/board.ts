@@ -27,14 +27,14 @@ export const boardSize = {
     direction
 }
 
-export const boardScale = (scale = 1) => {
+export const boardScale = (boardSize: BoardSizeType, scale = 1) => {
     return {
-        width: endWidth * scale,
-        height: endHeight * scale,
-        boardEdge: boardEdge,
-        cardWidth: cardWidth * scale,
-        cardHeight: cardHeight * scale,
-        direction: direction
+        width: boardSize.width * scale,
+        height: boardSize.height * scale,
+        boardEdge: boardSize.boardEdge,
+        cardWidth: boardSize.cardWidth * scale,
+        cardHeight: boardSize.cardHeight * scale,
+        direction: boardSize.direction
     }
 }
 

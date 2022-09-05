@@ -12,7 +12,9 @@ type CardProps = {
     y: number;
     boardSize: BoardSizeType;
     seatIndex: number;
-    direction?: number
+    direction?: number;
+    isSelect?: boolean;
+    onClick?: () => void;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -20,7 +22,9 @@ const Card: React.FC<CardProps> = ({
                                        x, y,
                                        boardSize,
                                        seatIndex,
-                                       direction = 0
+                                       direction = 0,
+                                       isSelect,
+                                       onClick
                                    }) => {
     const nodeRef = useRef<Konva.Group>(null);
     const {cardWidth, cardHeight} = boardSize;
@@ -37,7 +41,9 @@ const Card: React.FC<CardProps> = ({
         <Group
             ref={nodeRef}
             x={x}
-            y={y}
+            y={isSelect ? (y - 0.4 * cardWidth) : y}
+            onClick={onClick}
+            onTap={onClick}
         >
             <KImage
                 image={image}

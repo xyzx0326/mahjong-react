@@ -11,8 +11,10 @@ export type GridData = { rowIndex: number; colIndex: number };
 
 export type Player = {
     index: number;
+    enter?: CardType;
     cards: CardType[];
     immovable: CardType[][];
+    select?: number;
     isWin?: boolean;
     isRound?: boolean;
 }
@@ -34,12 +36,14 @@ const initialState = {
     steps: 0,
     players: [{
         index: 0,
-        cards: [{num: 1}, {num: 1}, {num: 1}, {num: 9}, {num: 9}, {num: 9}, {num: 29}, {num: 29}],
+        enter: {num: 29},
+        cards: [{num: 1}, {num: 1}, {num: 1}, {num: 9}, {num: 9}, {num: 9}, {num: 29}],
         immovable: [[{num: 19}, {num: 19, direction: 1}, {num: 19}], [{
             num: 11,
             direction: 2
         }, {num: 11}, {num: 11}, {num: 11, direction: 2}]],
         isWin: false,
+        select: 1,
         isRound: true
     }, {
         index: 1,

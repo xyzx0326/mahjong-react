@@ -10,11 +10,10 @@ import {Group, Image as KImage, Layer, Rect} from "react-konva";
 type BoardProps = {
     boardSize: BoardSizeType;
     selectGrid: GridData | undefined;
-    onGridSelect?: (data: GridData) => void;
 }
 
 
-const Board: React.FC<BoardProps> = ({boardSize, selectGrid, onGridSelect}) => {
+const Board: React.FC<BoardProps> = ({boardSize}) => {
     const {width, height, direction} = boardSize;
     // const imageRef = React.useRef<Konva.Image>(null);
     // const canvas = React.useMemo(() => {
@@ -43,10 +42,6 @@ const Board: React.FC<BoardProps> = ({boardSize, selectGrid, onGridSelect}) => {
     // 棋盘线格
     useEffect(() => {
     }, [])
-
-    const onClick = (data: GridData) => {
-        onGridSelect && onGridSelect(data)
-    }
 
     return (
         <Layer>

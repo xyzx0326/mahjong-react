@@ -8,6 +8,7 @@ export type SeatProps = {
     player: Player
     board: number
     boardSize: BoardSizeType
+    onCardSelect?: (index: number) => void;
 }
 
 const seat = (board: number, boardSize: BoardSizeType) => {
@@ -41,12 +42,12 @@ const seat = (board: number, boardSize: BoardSizeType) => {
 
 
 const Seat: React.FC<SeatProps> = ({player, board, boardSize}) => {
-    const {cards, immovable} = player;
+    const {cards, immovable, enter} = player;
     const seatIndex = player.index;
     const scale = seatIndex === 0 ? 1 : 0.8
-    const scaleBoard = boardScale(scale);
+    const scaleBoard = boardScale(boardSize, scale);
     const {cardWidth, cardHeight, boardEdge} = scaleBoard;
-    const immovableBoard = boardScale(0.8);
+    const immovableBoard = boardScale(boardSize, 0.8);
     const immovableCard = immovableBoard;
     const {xEdge, yEdge, rotation} = seat(board, scaleBoard)[seatIndex]
 
@@ -85,10 +86,23 @@ const Seat: React.FC<SeatProps> = ({player, board, boardSize}) => {
                              x={index * cardWidth}
                              y={0}
                              boardSize={scaleBoard}
-                             seatIndex={0}
+                             seatIndex={seatIndex}
+                             onClick={() => {
+                             }}
+                             isSelect={index === player.select}
                              direction={card.direction}
                 />;
             })}
+            {
+                enter ? <Card num={enter.num}
+                              x={(cards.length + 0.5) * cardWidth}
+                              y={0}
+                              boardSize={scaleBoard}
+                              seatIndex={seatIndex}
+                              isSelect={cards.length === player.select}
+                              direction={enter.direction}
+                /> : null
+            }
         </Group>
         <Group>
             {immovableCards}
