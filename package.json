@@ -11,6 +11,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^1.8.5",
     "game-react": "file:/Users/zhangxiang/gitwork/react/game-react",
+    "gifler": "^0.1.0",
     "konva": "^8.3.12",
     "nanoid": "^4.0.0",
     "react": "^18.2.0",

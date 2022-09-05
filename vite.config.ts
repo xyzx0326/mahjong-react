@@ -19,16 +19,16 @@ export default defineConfig(() => {
                 '@/pages': path.resolve(__dirname, 'src/pages'),
                 '@/utils': path.resolve(__dirname, 'src/utils'),
             },
-            css: {
-                preprocessorOptions: {
-                    scss: {
-                        charset: false
-                    }
-                },
-            },
-            server: {
-                host: '0.0.0.0',
-            }
         },
+        css: {
+            preprocessorOptions: {
+                scss: {
+                    charset: false
+                }
+            },
+        },
+        server: {
+            host: '0.0.0.0',
+        }
     }
 })

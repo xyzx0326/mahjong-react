@@ -1,7 +1,11 @@
+import white from "@/assets/test2.gif";
 import {BoardSizeType} from "@/config/board";
 import {GridData} from "@/stores/game";
+import "gifler";
+import Konva from "konva";
 import React, {useEffect} from 'react';
-import {Group, Layer, Rect} from "react-konva";
+
+import {Group, Image as KImage, Layer, Rect} from "react-konva";
 
 type BoardProps = {
     boardSize: BoardSizeType;
@@ -12,6 +16,29 @@ type BoardProps = {
 
 const Board: React.FC<BoardProps> = ({boardSize, selectGrid, onGridSelect}) => {
     const {width, height, direction} = boardSize;
+    // const imageRef = React.useRef<Konva.Image>(null);
+    // const canvas = React.useMemo(() => {
+    //     const node = document.createElement("canvas");
+    //     return node;
+    // }, []);
+    const image = new Image();
+    image.src = white;
+
+    // React.useEffect(() => {
+    //     // save animation instance to stop it on unmount
+    //     let anim: any;
+    //     window.gifler(white).get((a: any) => {
+    //         anim = a;
+    //         anim.animateInCanvas(canvas);
+    //         anim.onDrawFrame = (ctx: any, frame: any) => {
+    //             ctx.drawImage(frame.buffer, frame.x, frame.y);
+    //             imageRef.current?.getLayer()?.draw();
+    //         };
+    //     });
+    //     return () => anim.stop();
+    // }, [white, canvas]);
+
+    const board = direction === 1 ? height : width;
 
     // 棋盘线格
     useEffect(() => {
@@ -24,11 +51,16 @@ const Board: React.FC<BoardProps> = ({boardSize, selectGrid, onGridSelect}) => {
     return (
         <Layer>
             <Rect
-                width={width}
-                height={height}
+                width={board}
+                height={board}
                 fill='#22426c'
             />
-            <Group x={width} y={height}>
+            {/*<KImage ref={imageRef}*/}
+            {/*        image={canvas}*/}
+            {/*        y={width / 6}*/}
+            {/*        width={board}*/}
+            {/*        height={width / 3 * 2}/>*/}
+            <Group x={board} y={board}>
             </Group>
         </Layer>
     );

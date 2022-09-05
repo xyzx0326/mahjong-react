@@ -1,12 +1,12 @@
-import {Board, Piece} from "@/components";
+import {Board, Seat} from "@/components";
 import {BoardSizeType} from "@/config/board";
-import {GridData, PieceType} from "@/stores/game";
+import {GridData, Player} from "@/stores/game";
 
 import React from 'react';
-import {Layer, Stage} from "react-konva";
+import {Stage} from "react-konva";
 
 type GameProps = {
-    pieces: PieceType[]; // 棋子数据
+    players: Player[]
     selectGrid?: GridData; // 选择的棋子
     boardSize: BoardSizeType; // 棋盘规格
 
@@ -15,38 +15,23 @@ type GameProps = {
 }
 
 const Game: React.FC<GameProps> = ({
-                                       pieces, selectGrid, boardSize,
+                                       players, selectGrid, boardSize,
                                        onGridSelect, onPiecePut
                                    }) => {
-    const {width, height, boardEdge, cardHeight, direction} = boardSize
+    const {width, height, direction} = boardSize
 
-    pieces = [{num: 1}, {num: 2}, {num: 3}, {num: 4},
-        {num: 5}, {num: 6}, {num: 7}, {num: 8},
-        {num: 9}, {num: 10}, {num: 11}, {num: 12},
-        {num: 13}, {num: 14}]
+    const board = direction === 1 ? height : width;
+    // cards = [{num: 1}, {num: 2}, {num: 3}, {num: 4},
+    //     {num: 5}, {num: 6}, {num: 7}, {num: 8},
+    //     {num: 9}, {num: 10}, {num: 11}, {num: 12},
+    //     {num: 13}, {num: 14}]
+    // let yBoard = board - cardHeight;
     return (
-        <Stage width={width} height={height}>
+        <Stage width={board} height={board}>
             <Board boardSize={boardSize} selectGrid={selectGrid} onGridSelect={onGridSelect}/>
-
-            <Layer x={boardEdge} y={boardEdge - direction * cardHeight}>
-                {pieces.map((piece, index) => {
-                    return <Piece key={piece.num}
-                                  num={piece.num}
-                                  index={index}
-                                  boardSize={boardSize}
-                    />;
-                })}
-            </Layer>
-
-            <Layer x={boardEdge} y={height - boardEdge - direction * cardHeight}>
-                {pieces.map((piece, index) => {
-                    return <Piece key={piece.num}
-                                  num={piece.num}
-                                  index={index}
-                                  boardSize={boardSize}
-                    />;
-                })}
-            </Layer>
+            {players.map((player, index) => {
+                return <Seat key={index} board={board} player={player} boardSize={boardSize}></Seat>
+            })}
         </Stage>
     );
 }
