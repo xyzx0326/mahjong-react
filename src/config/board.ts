@@ -17,7 +17,6 @@ const cardHeight = endHeight * cardScale / cardSourceWidth * cardSourceHeight;
 // const boardEdge = (direction === 1 ? (endHeight - 14 * cardWidth) : (endHeight - 7 * cardWidth)) / 2
 const boardEdge = (endHeight - 14 * cardWidth) / 2
 
-console.log(endWidth, endHeight, cardWidth, boardEdge)
 export const boardSize = {
     width: direction === 1 ? endWidth : endHeight,
     height: direction === 1 ? endHeight : endWidth,

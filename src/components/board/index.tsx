@@ -46,7 +46,7 @@ const Board: React.FC<BoardProps> = ({boardSize}) => {
             <Rect
                 width={board}
                 height={board}
-                fill='#22426c'
+                fill='#72a7b7'
             />
             {/*<KImage ref={imageRef}*/}
             {/*        image={canvas}*/}

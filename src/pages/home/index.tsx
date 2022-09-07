@@ -10,10 +10,10 @@ function Home() {
     const roomId = nanoid();
     return (
         <div className="home">
-            {/*<h1>麻将</h1>*/}
-            {/*<button onClick={() => navigate(`/play/remote/${roomId}`)}>*/}
-            {/*    线上与人对战*/}
-            {/*</button>*/}
+            <h1>麻将</h1>
+            <button onClick={() => navigate(`/play/remote/${roomId}`)}>
+                线上与人对战
+            </button>
             {/*<button onClick={() => navigate("/play/ai")} disabled>*/}
             {/*    与机器对战*/}
             {/*</button>*/}

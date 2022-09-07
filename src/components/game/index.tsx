@@ -10,25 +10,28 @@ import Seat from "../seat";
 
 type GameProps = {
     players: Player[]
+    selfIndex: number,
     boardSize: BoardSizeType;
 
-    onCardSelect?: (index: number) => void;
+    onCardSelect?: (card: number, seat: number) => void;
 }
 
 const Game: React.FC<GameProps> = ({
                                        players,
+                                       selfIndex,
                                        boardSize,
                                        onCardSelect
                                    }) => {
     const {width, height, direction} = boardSize
-
     const board = direction === 1 ? height : width;
     return (
         <Stage width={board} height={board}>
             <Board boardSize={boardSize}/>
-            <Brand boardSize={boardSize}/>
+            <Brand players={players} boardSize={boardSize}/>
             {players.map((player, index) => {
-                return <Seat key={index} player={player} boardSize={boardSize} onCardSelect={onCardSelect}/>
+                return <Seat selfIndex={selfIndex} maxPlayer={players.length}
+                             key={index} player={player} boardSize={boardSize}
+                             onCardSelect={onCardSelect}/>
             })}
         </Stage>
     );

@@ -1,6 +1,5 @@
-import pai from '@/assets/card/pai.gif';
 import {BoardSizeType} from "@/config/board";
-import cards, {cardLib} from "@/config/card";
+import cards from "@/config/card";
 
 import Konva from "konva";
 import React, {useRef} from 'react';
@@ -31,11 +30,6 @@ const Card: React.FC<CardProps> = ({
     const nodeRef = useRef<Konva.Group>(null);
     const {cardWidth, cardHeight} = boardSize;
 
-
-    const image = new Image();
-    image.src = seatIndex !== 0 || (direction & 2) === 2 ? pai : cards[card];
-
-
     const xOffset = (Math.floor(seatIndex / 2) - 0.5) * 2;
     const yOffset = seatIndex === 0 || seatIndex === 3 ? -1 : 1;
 
@@ -44,11 +38,11 @@ const Card: React.FC<CardProps> = ({
             ref={nodeRef}
             x={x}
             y={isSelect ? (y - 0.4 * cardWidth) : y}
-            onClick={() => onSelect && onSelect(num)}
-            onTap={() => onSelect && onSelect(num)}
+            onClick={() => onSelect && onSelect(card)}
+            onTap={() => onSelect && onSelect(card)}
         >
             <KImage
-                image={image}
+                image={cards[num]}
                 width={cardWidth}
                 height={cardHeight}
                 rotation={direction === 1 ? 270 : 0}

@@ -6,8 +6,10 @@ import Card from "../card";
 
 export type SeatProps = {
     player: Player
+    maxPlayer: number
+    selfIndex: number
     boardSize: BoardSizeType
-    onCardSelect?: (index: number) => void;
+    onCardSelect?: (card: number, seat: number) => void;
 }
 
 const seat = (board: number, boardSize: BoardSizeType) => {
@@ -40,11 +42,11 @@ const seat = (board: number, boardSize: BoardSizeType) => {
 }
 
 
-const Seat: React.FC<SeatProps> = ({player, boardSize, onCardSelect}) => {
+const Seat: React.FC<SeatProps> = ({player, maxPlayer, selfIndex, boardSize, onCardSelect}) => {
     const {width, height, direction} = boardSize
     const board = direction === 1 ? height : width;
     const {cards, immovable, enter} = player;
-    const seatIndex = player.index;
+    const seatIndex = (player.index - selfIndex + maxPlayer) % maxPlayer;
     const scale = seatIndex === 0 ? 1 : 0.8
     const scaleBoard = boardScale(boardSize, scale);
     const {cardWidth, cardHeight, boardEdge} = scaleBoard;
@@ -80,6 +82,9 @@ const Seat: React.FC<SeatProps> = ({player, boardSize, onCardSelect}) => {
             })}
         </Group>;
     });
+    const onSelect = (card: number) => {
+        onCardSelect && onCardSelect(card, player.index);
+    }
     return <Layer x={xEdge} y={yEdge} rotation={rotation}>
         <Group>
             {cards.map((card, index) => {
@@ -90,8 +95,8 @@ const Seat: React.FC<SeatProps> = ({player, boardSize, onCardSelect}) => {
                              y={0}
                              boardSize={scaleBoard}
                              seatIndex={seatIndex}
-                             onSelect={onCardSelect}
-                             isSelect={index === player.select}
+                             onSelect={onSelect}
+                             isSelect={card.card === player.select}
                              direction={card.direction}
                 />;
             })}
@@ -102,8 +107,8 @@ const Seat: React.FC<SeatProps> = ({player, boardSize, onCardSelect}) => {
                               y={0}
                               boardSize={scaleBoard}
                               seatIndex={seatIndex}
-                              onSelect={onCardSelect}
-                              isSelect={cards.length === player.select}
+                              onSelect={onSelect}
+                              isSelect={enter.card === player.select}
                               direction={enter.direction}
                 /> : null
             }

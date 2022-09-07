@@ -38,25 +38,31 @@ import z5 from '@/assets/card/z5.gif';
 import z6 from '@/assets/card/z6.gif';
 import z7 from '@/assets/card/z7.gif';
 
+const image = (src: string) => {
+    const ret = new Image();
+// image.src = seatIndex !== 0 || (direction & 2) === 2 ? pai : cards[card];
+    ret.src = src;
+    return ret
+}
 // 0 红5万  1-9 1-9万
 // 10 红5筒  11-19 1-9筒
 // 20 红5条  21-29 1-9条
 // 31-37 东南西北白发中
 // 38, 39 牌背
 const cards = [
-    m0, m1, m2, m3, m4, m5, m6, m7, m8, m9,
-    p0, p1, p2, p3, p4, p5, p6, p7, p8, p9,
-    s0, s1, s2, s3, s4, s5, s6, s7, s8, s9,
-    '', z1, z2, z3, z4, z5, z6, z7, pai, pai2
+    image(m0), image(m1), image(m2), image(m3), image(m4), image(m5), image(m6), image(m7), image(m8), image(m9),
+    image(p0), image(p1), image(p2), image(p3), image(p4), image(p5), image(p6), image(p7), image(p8), image(p9),
+    image(s0), image(s1), image(s2), image(s3), image(s4), image(s5), image(s6), image(s7), image(s8), image(s9),
+    undefined, image(z1), undefined, image(z2), undefined, image(z3), undefined, image(z4), undefined, image(z5),
+    undefined, image(z6), undefined, image(z7), image(pai), image(pai2)
 ]
 
 // 初始化牌库
 export const cardLib = [
     [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
-    11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14, 15, 15, 15, 15, 16, 16, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18, 19, 19, 19, 19,
-    21, 21, 21, 21, 22, 22, 22, 22, 23, 23, 23, 23, 24, 24, 24, 24, 25, 25, 25, 25, 26, 26, 26, 26, 27, 27, 27, 27, 28, 28, 28, 28, 29, 29, 29, 29,
-    31, 31, 31, 31, 32, 32, 32, 32, 33, 33, 33, 33, 34, 34, 34, 34, 35, 35, 35, 35, 36, 36, 36, 36, 37, 37, 37, 37]
-    ]
+        11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14, 15, 15, 15, 15, 16, 16, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18, 19, 19, 19, 19,
+        21, 21, 21, 21, 22, 22, 22, 22, 23, 23, 23, 23, 24, 24, 24, 24, 25, 25, 25, 25, 26, 26, 26, 26, 27, 27, 27, 27, 28, 28, 28, 28, 29, 29, 29, 29,
+        31, 31, 31, 31, 33, 33, 33, 33, 35, 35, 35, 35, 37, 37, 37, 37, 39, 39, 39, 39, 41, 41, 41, 41, 43, 43, 43, 43]
+]
 
-console.log(cardLib.length)
 export default cards;

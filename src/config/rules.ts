@@ -1,15 +1,27 @@
+import {Player} from "@/stores/game";
+
 const rules = {
     "3": {
         title: "三人麻将",
         maxPlayer: 3,
-        cards: [],
+        cardLib: 1,
     },
     "4": {
         title: "四人麻将",
         maxPlayer: 4,
-        cards: [],
+        cardLib: 0,
     }
 };
+
+const rules2 = {
+    win: (players: Player[], card: number)=>{
+        for (let i = 0; i < players.length; i++) {
+            const player = players[i];
+            const cards = player.cards.map(v=>v.num);
+            cards.push(card);
+        }
+    }
+}
 
 export const defaultRule = rules["4"]
 
