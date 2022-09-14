@@ -47,8 +47,8 @@ const image = (src: string) => {
 // 0 红5万  1-9 1-9万
 // 10 红5筒  11-19 1-9筒
 // 20 红5条  21-29 1-9条
-// 31-37 东南西北白发中
-// 38, 39 牌背
+// 31-43 东南西北白发中
+// 44, 45 牌背
 const cards = [
     image(m0), image(m1), image(m2), image(m3), image(m4), image(m5), image(m6), image(m7), image(m8), image(m9),
     image(p0), image(p1), image(p2), image(p3), image(p4), image(p5), image(p6), image(p7), image(p8), image(p9),
@@ -56,6 +56,11 @@ const cards = [
     undefined, image(z1), undefined, image(z2), undefined, image(z3), undefined, image(z4), undefined, image(z5),
     undefined, image(z6), undefined, image(z7), image(pai), image(pai2)
 ]
+
+export const cardSinge = [1, 2, 3, 4, 5, 6, 7, 8, 9,
+    11, 12, 13, 14, 15, 16, 17, 18, 19,
+    21, 22, 23, 24, 25, 26, 27, 28, 29,
+    31, 33, 35, 37, 39, 41, 43]
 
 // 初始化牌库
 export const cardLib = [

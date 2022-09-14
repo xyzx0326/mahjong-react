@@ -10,7 +10,7 @@ import {Provider} from "react-redux";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import './index.css'
 
-const url = "10.21.103.127:8888";
+const url = "10.21.102.209:8888";
 // const url = "game.congeer.com";
 const dispatch = store.dispatch;
 configClient("ws://" + url + "/game/ws", {
