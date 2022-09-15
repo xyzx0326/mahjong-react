@@ -2,11 +2,11 @@ import {Game} from "@/components";
 import {boardSize} from "@/config/board";
 import modes from '@/config/modes'
 import {useGo, useRemoteGo, useStore} from "@/hooks";
-import {handleOutCard, handleRestart, handleSelectCard} from "@/stores/game";
-import {addRoom, leaveRoom, seedCreate, useOnline} from 'game-react';
+import {handleOutCard, handleRestart, handleSelectCard, touchCard} from "@/stores/game";
+import {addRoom, leaveRoom, resetRoom, seedCreate, useOnline} from 'game-react';
 import React from 'react';
 import {useParams} from "react-router-dom";
-import {useMount} from "react-use";
+import {useMount, useUpdateEffect} from "react-use";
 
 import './index.scss'
 
@@ -37,12 +37,13 @@ const Play = () => {
         if (mode === "remote" && !online.isPlayer) {
             return;
         }
-        go(handleRestart());
         if (mode === "remote") {
+            resetRoom()
             seedCreate({count: 136, start: 0})
+        } else {
+            go(handleRestart());
         }
     }
-
 
     const handleCard = (card: number, seat: number) => {
         if (mode === "remote" && !online.isPlayer) {
@@ -55,8 +56,8 @@ const Play = () => {
             return
         }
         const player = game.players[game.selfIndex];
-        if (player.select) {
-            remoteGo(handleOutCard({card, seat}))
+        if (player.select && game.currentIndex === game.selfIndex) {
+            remoteGo(handleOutCard(card))
         } else {
             go(handleSelectCard({card, seat}))
         }
@@ -70,8 +71,7 @@ const Play = () => {
                         </button>
                     </div>
                 </div>
-                <div className="board-body"
-                     style={{height: `${boardSize.width}px`}}>
+                <div className="board-body" style={{height: `${boardSize.width}px`}}>
                     <Game
                         selfIndex={game.selfIndex}
                         boardSize={boardSize}

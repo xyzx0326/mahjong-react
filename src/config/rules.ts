@@ -1,5 +1,5 @@
 import {cardSinge} from "@/config/card";
-import {Player, WinStrategy} from "@/stores/game";
+import {Player, Strategy} from "@/stores/game";
 
 const rules = {
     "3": {
@@ -27,31 +27,30 @@ function getCardMap(player: Player) {
 }
 
 export const winRules = {
-
     // 杠
-    quadruple: (player: Player) => {
+    quadruple: (player: Player): Strategy[] => {
         const cardMap = getCardMap(player);
         const ret = []
         for (let key in cardMap) {
             if (cardMap[key] === 3) {
-                ret.push({quadruple: parseInt(key)})
+                ret.push({type:'quadruple', card: parseInt(key)})
             }
         }
         return ret;
     },
     // 刻子
-    triplet: (player: Player) => {
+    triplet: (player: Player): Strategy[] => {
         const cardMap = getCardMap(player);
         const ret = []
         for (let key in cardMap) {
             if (cardMap[key] == 2) {
-                ret.push({triplet: parseInt(key)})
+                ret.push({type:'triplet', card: parseInt(key)})
             }
         }
         return ret;
     },
     // 顺子
-    straight: (player: Player) => {
+    straight: (player: Player): Strategy[] => {
         const cards = player.cards.map(v => v.num);
         const cardList = []
         for (let i = 0; i < cards.length; i++) {
@@ -61,18 +60,35 @@ export const winRules = {
         }
         cardList.sort((a, b) => a - b)
         const ret = []
+        const set: any = {}
         for (let i = 1; i < cardList.length; i++) {
             if (cardList[i - 1] + 1 === cardList[i]) {
-                ret.push({straight: cardList[i - 1] - 1})
-                ret.push({straight: cardList[i] + 1})
+                const number1 = cardList[i - 1] - 1;
+                if (!set[number1]) {
+                    set[number1] = 1
+                    ret.push({card: number1, type: 'straight'})
+                }
+                const number2 = cardList[i] + 1;
+                if (!set[number2]) {
+                    set[number2] = 1
+                    ret.push({card: number2, type: 'straight'})
+                }
+            }
+            for (let j = 1; j < 5; j++) {
+                if (i - j >= 0 && cardList[i - j] + 2 === cardList[i]) {
+                    const number = cardList[i] - 1;
+                    if (!set[number]) {
+                        set[number] = 1
+                        ret.push({card: number, type: 'straight'})
+                    }
+                }
             }
         }
-        return ret.filter(v => cardSinge.indexOf(v.straight) != -1)
+        return ret.filter(v => cardSinge.indexOf(v.card) != -1)
     },
     // 基础赢法
-    win: (player: Player): WinStrategy[] => {
+    win: (player: Player): Strategy[] => {
         const immovable = player.immovable.length;
-        const start = new Date().getTime();
         const cards = player.cards.map(v => v.num);
 
         const cardList = []
@@ -107,13 +123,11 @@ export const winRules = {
                             bbb++;
                             continue;
                         }
-                        win.push({pairs: singe, win: winCard})
+                        win.push({type: 'win', card: winCard})
                     }
                 }
             }
         }
-
-        const end = new Date().getTime();
         return win
     }
 }

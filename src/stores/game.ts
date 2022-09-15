@@ -9,10 +9,7 @@ export type Player = {
     index: number;
     score: number;
     cards: CardType[];
-    win: WinStrategy[];
-    quadruple: QuadrupleStrategy[];
-    triplet: TripletStrategy[];
-    straight: StraightStrategy[];
+    strategy: Strategy[];
 
     outer: CardType[];
     immovable: CardType[][];
@@ -22,27 +19,16 @@ export type Player = {
     enter?: CardType;
 }
 
-export type WinStrategy = {
-    win: number;
-    pairs: number;
-}
-
-export type QuadrupleStrategy = {
-    quadruple: number;
-}
-
-export type TripletStrategy = {
-    triplet: number;
-}
-
-export type StraightStrategy = {
-    straight: number;
+export type Strategy = {
+    card: number;
+    type: string;
 }
 
 export type GameFrameData = {
-    steps: number // 步数
+    lastOut: CardType | undefined
     cards: number[]
     cardIndex: number
+    contendIndex: number[]
     players: Player[]
     currentIndex: number
     selfIndex: number
@@ -60,18 +46,17 @@ const basePlayer = (index: number) => {
         isWin: false,
         score: 25000,
 
-        win: [],
-        quadruple: [],
-        triplet: [],
-        straight: [],
+        strategy: [],
     }
 }
 
 const cacheRule = CacheUtils.getItem(CACHE_RULE_KEY, defaultRule);
 
 const initialState = {
-    steps: 0,
     currentIndex: -1,
+    contendIndex: [],
+
+    lastOut: undefined,
     cards: [],
     cardIndex: 0,
     selfIndex: 1,
@@ -86,50 +71,53 @@ export const gameSlice = createSlice({
     name: 'game',
     initialState,
     reducers: {
+        // 更新牌山
         updateCards(state, {payload}) {
             state.cards = payload;
         },
+        // 更新策略
         updateStrategy(state) {
+            const start = new Date().getTime();
             for (let i = 0; i < state.players.length; i++) {
                 const player = state.players[i];
                 player.cards.sort((a, b) => a.num - b.num)
-                player.win = [...winRules.win(player)]
-                player.quadruple = winRules.quadruple(player)
-                player.triplet = winRules.triplet(player)
-                player.straight = winRules.straight(player)
-                console.log({...player})
+                player.strategy = [...winRules.win(player), ...winRules.quadruple(player), ...winRules.triplet(player), ...winRules.straight(player)]
             }
+            const end = new Date().getTime();
+            console.log("time" + (end - start), end)
         },
+        // 摸一张
         touchCard(state) {
-            const currentLib = cardLib[state.rule.cardLib];
-            state.currentIndex = (state.currentIndex + 1) % state.rule.maxPlayer
-            const current = state.players[(state.rule.maxPlayer + state.currentIndex - 1) % state.rule.maxPlayer]
-            const player = state.players[state.currentIndex];
-            if (current.enter) {
-                current.cards.push(current.enter)
-                current.enter = undefined
+            if (!state.lastOut && state.contendIndex.length === 0) {
+                const currentLib = cardLib[state.rule.cardLib];
+                state.currentIndex = (state.currentIndex + 1) % state.rule.maxPlayer
+                const current = state.players[(state.rule.maxPlayer + state.currentIndex - 1) % state.rule.maxPlayer]
+                const player = state.players[state.currentIndex];
+                if (current.enter) {
+                    current.cards.push(current.enter)
+                    current.enter = undefined
+                }
+                const cardIndex = state.cards[state.cardIndex];
+                player.enter = {
+                    num: currentLib[cardIndex],
+                    card: cardIndex
+                }
+                state.cardIndex++
             }
-            const cardIndex = state.cards[state.cardIndex];
-            player.enter = {
-                num: currentLib[cardIndex],
-                card: cardIndex
-            }
-            state.cardIndex++
         },
-        /**
-         * 重开游戏
-         */
+        // 重开游戏
         handleRestart(state) {
             state.gameIsEnd = false;
-            state.steps = 0;
+            state.cardIndex = 0;
             state.currentIndex = -1;
+            state.contendIndex = []
             state.players = [basePlayer(0), basePlayer(1), basePlayer(2), basePlayer(3)];
         },
-
+        // 更新位置
         updateSelfIndex(state, {payload}) {
             state.selfIndex = payload;
         },
-
+        // 更新规则
         updateRule(state, {payload}) {
             state.rule = payload
             CacheUtils.setItem(CACHE_RULE_KEY, state.rule)
@@ -152,51 +140,53 @@ export const gameSlice = createSlice({
             state.currentIndex = payload.seat
         },
 
-        handleOutCard(state, {payload}) {
-            const {card, seat} = payload;
-            const player = state.players[seat]
-            // 是当前操作人
-            if (seat === state.currentIndex) {
-                let select: CardType;
-                if (player.enter && player.enter?.card === card) {
-                    player.outer.push(player.enter)
-                    select = player.enter
+        // 出牌
+        updateOutCard(state, {payload}) {
+            const card = payload;
+            const player = state.players[state.currentIndex]
+            if (player.enter && player.enter?.card === card) {
+                player.outer.push(player.enter)
+                state.lastOut = player.enter
+                player.enter = undefined;
+            } else {
+                state.lastOut = player.cards.filter(v => v.card === card)[0];
+                player.cards = player.cards.filter(v => v.card !== card);
+                if (player.enter) {
+                    player.cards.push(player.enter);
                     player.enter = undefined;
-                } else {
-                    select = player.cards.filter(v => v.card === card)[0];
-                    player.outer.push(select)
-                    player.cards = player.cards.filter(v => v.card !== card);
-                    if (player.enter) {
-                        player.cards.push(player.enter);
-                        player.enter = undefined;
-                    }
-                    player.cards.sort((a, b) => a.num - b.num)
                 }
-                let q = -1
-                let t = -1
-                let s = -1
-                for (let i = 0; i < state.players.length; i++) {
-                    if (i === seat) {
-                        continue;
-                    }
-                    const pi = state.players[i];
-                    if (pi.quadruple.find(v => v.quadruple === select.num)) {
-                        q = i;
-                        break;
-                    }
-                    if (pi.triplet.find(v => v.triplet === select.num)) {
-                        t = i;
-                    }
-                }
-                if (q != -1) {
-
-                }
-                const next = state.players[(seat + 1) % 4];
-                if (next.straight.find(v => v.straight === select.num)) {
-                    s = (seat + 1) % state.rule.maxPlayer;
-                }
+                player.cards.sort((a, b) => a.num - b.num)
             }
             player.select = undefined;
+        },
+
+        updateContend(state) {
+            let t = -1
+            for (let i = 0; i < state.players.length; i++) {
+                if (i === state.currentIndex) {
+                    continue;
+                }
+                const pi = state.players[i];
+                if (pi.strategy.find(v => v.type === 'quadruple' && v.card === state.lastOut?.num)) {
+                    state.contendIndex.push(i)
+                    break;
+                }
+                if (pi.strategy.find(v => v.type === 'triplet' && v.card === state.lastOut?.num)) {
+                    t = i;
+                    break;
+                }
+            }
+            if (t != -1) {
+                state.contendIndex.push(t)
+            }
+            const next = state.players[(state.currentIndex + 1) % 4];
+            if (next.strategy.find(v => v.type === 'straight' && v.card === state.lastOut?.num)) {
+                state.contendIndex.push((state.currentIndex + 1) % state.rule.maxPlayer);
+            }
+            if (state.contendIndex.length === 0 && state.lastOut) {
+                state.players[state.currentIndex].outer.push(state.lastOut);
+                state.lastOut = undefined
+            }
         },
 
         handleSelectCard(state, {payload}) {
@@ -219,7 +209,8 @@ export const {
     updateRule,
     dealCard,
     updateSelfIndex,
-    handleOutCard,
+    updateOutCard,
+    updateContend,
     handleSelectCard,
 } = gameSlice.actions
 
@@ -231,4 +222,10 @@ export const startRound = (cards: number[]) => (d: Dispatch) => {
         d(touchCard())
     }
     d(updateStrategy())
+}
+
+export const handleOutCard = (card: number) => (d: Dispatch) => {
+    d(updateOutCard(card))
+    d(updateContend())
+    d(touchCard())
 }

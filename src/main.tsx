@@ -1,7 +1,7 @@
 import {defaultRule} from "@/config/rules";
 import {Home, Play} from "@/pages";
 import {store} from "@/stores";
-import {startRound, updateRule, updateSelfIndex} from "@/stores/game";
+import {handleRestart, startRound, updateRule, updateSelfIndex} from "@/stores/game";
 import {CACHE_RULE_KEY, CacheUtils} from "@/utils";
 import {configClient, SeedData} from "game-react";
 import React from 'react'
@@ -26,11 +26,10 @@ configClient("ws://" + url + "/game/ws", {
     ],
     onConfig: dispatch,
     onAction: dispatch,
+    onReset: () => dispatch(handleRestart()),
     onSeed: (data: SeedData) => {
         if (data.code === "main") {
-            dispatch(startRound(data.data))
-        } else if (data.code === "") {
-
+            dispatch(startRound(data.data!))
         }
     }
 }, "mahjong")
