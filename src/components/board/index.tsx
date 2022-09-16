@@ -47,6 +47,7 @@ const Board: React.FC<BoardProps> = ({boardSize}) => {
                 width={board}
                 height={board}
                 fill='#72a7b7'
+                cornerRadius={boardSize.boardEdge / 10}
             />
             {/*<KImage ref={imageRef}*/}
             {/*        image={canvas}*/}

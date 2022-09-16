@@ -123,23 +123,6 @@ export const gameSlice = createSlice({
             CacheUtils.setItem(CACHE_RULE_KEY, state.rule)
         },
 
-        dealCard(state, {payload}) {
-            const current = state.players[state.currentIndex]
-            const player = state.players[payload.seat];
-            if (current.enter) {
-                current.cards.push(current.enter)
-                current.cards.sort((a, b) => {
-                    return a.num - b.num
-                })
-                current.enter = undefined
-            }
-            player.enter = {
-                num: cardLib[state.rule.cardLib][payload.index],
-                card: payload.index
-            }
-            state.currentIndex = payload.seat
-        },
-
         // 出牌
         updateOutCard(state, {payload}) {
             const card = payload;
@@ -161,7 +144,16 @@ export const gameSlice = createSlice({
         },
 
         updateContend(state) {
-            let t = -1
+            for (let i = 0; i < state.players.length; i++) {
+                if (i === state.currentIndex) {
+                    continue;
+                }
+                const pi = state.players[i];
+                if (pi.strategy.find(v => v.type === 'win' && v.card === state.lastOut?.num)) {
+                    state.contendIndex.push(i)
+                    break;
+                }
+            }
             for (let i = 0; i < state.players.length; i++) {
                 if (i === state.currentIndex) {
                     continue;
@@ -171,13 +163,16 @@ export const gameSlice = createSlice({
                     state.contendIndex.push(i)
                     break;
                 }
+            }
+            for (let i = 0; i < state.players.length; i++) {
+                if (i === state.currentIndex) {
+                    continue;
+                }
+                const pi = state.players[i];
                 if (pi.strategy.find(v => v.type === 'triplet' && v.card === state.lastOut?.num)) {
-                    t = i;
+                    state.contendIndex.push(i)
                     break;
                 }
-            }
-            if (t != -1) {
-                state.contendIndex.push(t)
             }
             const next = state.players[(state.currentIndex + 1) % 4];
             if (next.strategy.find(v => v.type === 'straight' && v.card === state.lastOut?.num)) {
@@ -207,7 +202,6 @@ export const {
     touchCard,
     handleRestart,
     updateRule,
-    dealCard,
     updateSelfIndex,
     updateOutCard,
     updateContend,

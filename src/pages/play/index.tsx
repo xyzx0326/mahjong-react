@@ -2,11 +2,11 @@ import {Game} from "@/components";
 import {boardSize} from "@/config/board";
 import modes from '@/config/modes'
 import {useGo, useRemoteGo, useStore} from "@/hooks";
-import {handleOutCard, handleRestart, handleSelectCard, touchCard} from "@/stores/game";
+import {handleOutCard, handleRestart, handleSelectCard} from "@/stores/game";
 import {addRoom, leaveRoom, resetRoom, seedCreate, useOnline} from 'game-react';
 import React from 'react';
 import {useParams} from "react-router-dom";
-import {useMount, useUpdateEffect} from "react-use";
+import {useMount} from "react-use";
 
 import './index.scss'
 
@@ -73,7 +73,11 @@ const Play = () => {
                 </div>
                 <div className="board-body" style={{height: `${boardSize.width}px`}}>
                     <Game
+                        contendIndex={game.contendIndex}
+                        lastOut={game.lastOut}
                         selfIndex={game.selfIndex}
+                        currentIndex={game.currentIndex}
+                        leftCount={game.cards.length - game.cardIndex}
                         boardSize={boardSize}
                         players={game.players}
                         onCardSelect={handleCard}

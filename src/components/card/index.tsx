@@ -10,6 +10,7 @@ type CardProps = {
     card: number;
     x: number;
     y: number;
+    hide?: boolean;
     boardSize: BoardSizeType;
     seatIndex: number;
     direction?: number;
@@ -23,6 +24,7 @@ const Card: React.FC<CardProps> = ({
                                        x, y,
                                        boardSize,
                                        seatIndex,
+                                       hide,
                                        direction = 0,
                                        isSelect,
                                        onSelect
@@ -42,14 +44,14 @@ const Card: React.FC<CardProps> = ({
             onTap={() => onSelect && onSelect(card)}
         >
             <KImage
-                image={cards[num]}
+                image={cards[hide ? 44 : num]}
                 width={cardWidth}
                 height={cardHeight}
                 rotation={direction === 1 ? 270 : 0}
                 offsetX={direction === 1 ? cardHeight : 0}
                 shadowColor="#000"
                 shadowBlur={10}
-                shadowOffset={{x: 10 * -1 * xOffset, y: 10 * -1 * yOffset}}
+                shadowOffset={{x: cardWidth / 5 * -1 * xOffset, y: cardWidth / 5 * -1 * yOffset}}
                 shadowOpacity={0.5}
             />
         </Group>
