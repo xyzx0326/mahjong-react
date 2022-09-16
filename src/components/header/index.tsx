@@ -8,12 +8,11 @@ import './index.scss'
 
 type HeaderProps = {
     mode: string,
-    selfIsWhite: boolean,
-    otherSideOnline: boolean,
+    online: any
     channelId?: string
 }
 
-const Header: React.FC<HeaderProps> = ({mode, selfIsWhite, otherSideOnline, channelId}) => {
+const Header: React.FC<HeaderProps> = ({mode, online, channelId}) => {
     const [state, copyToClipboard] = useCopyToClipboard();
     const copyLink = () => {
         copyToClipboard(window.location.href)
@@ -27,10 +26,9 @@ const Header: React.FC<HeaderProps> = ({mode, selfIsWhite, otherSideOnline, chan
     return mode !== 'local' ?
         <div className="header">
             <div className="color-piece">
-                <img className="piece-img" src={!selfIsWhite ? white : black} alt=""/>
-                <span>对方{mode === "remote" ? otherSideOnline ? '在线' : '离线或无人' : ''}</span>
+                <span>{mode === "remote" ? `${online.playerCount}人在线` : ''}</span>
             </div>
-            {mode === "remote" && !otherSideOnline ?
+            {mode === "remote" ?
                 <div className="channel">
                     <span>房间：{channelId}</span>
                     <button onClick={copyLink}>邀请

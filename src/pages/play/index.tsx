@@ -1,8 +1,18 @@
-import {Game} from "@/components";
+import {Game, Header} from "@/components";
 import {boardSize} from "@/config/board";
 import modes from '@/config/modes'
 import {useGo, useRemoteGo, useStore} from "@/hooks";
-import {handleOutCard, handleRestart, handleSelectCard} from "@/stores/game";
+import {
+    handleNoContend,
+    handleOutCard,
+    handleQuadruple,
+    handleRestart,
+    handleSelectCard,
+    handleStraight,
+    handleTriplet,
+    handleWin,
+    Player
+} from "@/stores/game";
 import {addRoom, leaveRoom, resetRoom, seedCreate, useOnline} from 'game-react';
 import React from 'react';
 import {useParams} from "react-router-dom";
@@ -18,6 +28,7 @@ const Play = () => {
     const params = useParams();
     const mode = params.mode as (keyof typeof modes) || 'ai';
     const remoteGo = useRemoteGo(mode);
+    const self: Player = game.players[game.selfIndex];
 
     useMount(() => {
         go(handleRestart())
@@ -55,15 +66,68 @@ const Play = () => {
         if (seat !== game.selfIndex) {
             return
         }
-        const player = game.players[game.selfIndex];
-        if (player.select && game.currentIndex === game.selfIndex) {
+        if (self.select && game.currentIndex === game.selfIndex) {
             remoteGo(handleOutCard(card))
         } else {
             go(handleSelectCard({card, seat}))
         }
     }
+
+    const inCard = self.enter && self.enter.num;
+
+    const winSelf = self.strategy.find(v => v.card === inCard && v.type === 'win');
+
+    const lastOutCard = game.lastOut && game.lastOut.num;
+    let ops: any = []
+
+    if (game.contendIndex.length > 0 && game.contendIndex[0] === game.selfIndex) {
+        self.strategy.filter(v => v.card === lastOutCard).map(v => {
+            if (v.type === "win") {
+                ops.push({
+                    text: "和", op: () => {
+                        remoteGo(handleWin({index: game.selfIndex, type: "winOther"}))
+                    }
+                })
+            } else if (v.type === "quadruple") {
+                ops.push({
+                    text: "杠", op: () => {
+                        remoteGo(handleQuadruple({index: game.selfIndex}))
+                    }
+                })
+            } else if (v.type === "triplet") {
+                ops.push({
+                    text: "碰", op: () => {
+                        remoteGo(handleTriplet({index: game.selfIndex}))
+                    }
+                })
+            } else if (v.type === "straight") {
+                ops.push({
+                    text: "吃", op: () => {
+                        remoteGo(handleStraight({index: game.selfIndex}))
+                    }
+                })
+            }
+        })
+    }
+    if (ops.length > 0) {
+        ops.push({
+            text: "不要", op: () => {
+                remoteGo(handleNoContend({index: game.selfIndex}))
+            }
+        })
+    }
+    if (winSelf) {
+        ops = [{
+            text: "自摸", op: () => {
+                remoteGo(handleWin({index: game.selfIndex, type: "winSelf"}))
+            }
+        }, ...ops]
+    }
+
     return (
         <div className="main" style={{width: `${boardSize.width}px`}}>
+            <Header mode={mode} online={online}
+                    channelId={params.roomId ? params.roomId!.substring(0, 4) : ''}/>
             <div className="board">
                 <div className="board-header">
                     <div>
@@ -73,14 +137,14 @@ const Play = () => {
                 </div>
                 <div className="board-body" style={{height: `${boardSize.width}px`}}>
                     <Game
-                        contendIndex={game.contendIndex}
                         lastOut={game.lastOut}
                         selfIndex={game.selfIndex}
                         currentIndex={game.currentIndex}
-                        leftCount={game.cards.length - game.cardIndex}
+                        leftCount={game.cardEndIndex - game.cardIndex + 1}
                         boardSize={boardSize}
                         players={game.players}
                         onCardSelect={handleCard}
+                        ops={ops}
                     />
                 </div>
             </div>

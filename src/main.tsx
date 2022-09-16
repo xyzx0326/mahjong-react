@@ -10,8 +10,8 @@ import {Provider} from "react-redux";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import './index.css'
 
-const url = "10.21.102.209:8888";
-// const url = "game.congeer.com";
+// const url = "10.21.102.209:8888";
+const url = "game.congeer.com";
 const dispatch = store.dispatch;
 configClient("ws://" + url + "/game/ws", {
     maxPlayer: 4,
@@ -40,7 +40,7 @@ const root = ReactDOM.createRoot(
 
 root.render(
     <Provider store={store}>
-        <BrowserRouter basename="/">
+        <BrowserRouter basename="/mahjong">
             <Routes>
                 <Route path="/" element={<Home/>}/>
                 <Route path="/play/:mode" element={<Play/>}/>

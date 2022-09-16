@@ -22,12 +22,14 @@ export type Player = {
 export type Strategy = {
     card: number;
     type: string;
+    pairs?: number[]
 }
 
 export type GameFrameData = {
     lastOut: CardType | undefined
     cards: number[]
     cardIndex: number
+    cardEndIndex: number
     contendIndex: number[]
     players: Player[]
     currentIndex: number
@@ -59,6 +61,7 @@ const initialState = {
     lastOut: undefined,
     cards: [],
     cardIndex: 0,
+    cardEndIndex: 135,
     selfIndex: 1,
     players: [basePlayer(0), basePlayer(1), basePlayer(2), basePlayer(3)],
     gameIsEnd: false,
@@ -86,8 +89,13 @@ export const gameSlice = createSlice({
             const end = new Date().getTime();
             console.log("time" + (end - start), end)
         },
-        // 摸一张
-        touchCard(state) {
+        // 摸一张 true从头 false从尾
+        touchCard(state, {payload}) {
+            // 没牌了, 游戏结束
+            if (state.cardIndex === state.cardEndIndex) {
+                state.gameIsEnd = true
+                return
+            }
             if (!state.lastOut && state.contendIndex.length === 0) {
                 const currentLib = cardLib[state.rule.cardLib];
                 state.currentIndex = (state.currentIndex + 1) % state.rule.maxPlayer
@@ -97,20 +105,31 @@ export const gameSlice = createSlice({
                     current.cards.push(current.enter)
                     current.enter = undefined
                 }
-                const cardIndex = state.cards[state.cardIndex];
-                player.enter = {
-                    num: currentLib[cardIndex],
-                    card: cardIndex
+                if (payload) {
+                    const cardIndex = state.cards[state.cardIndex];
+                    player.enter = {
+                        num: currentLib[cardIndex],
+                        card: cardIndex
+                    }
+                    state.cardIndex++
+                } else {
+                    const cardEndIndex = state.cards[state.cardEndIndex];
+                    player.enter = {
+                        num: currentLib[cardEndIndex],
+                        card: cardEndIndex
+                    }
+                    state.cardEndIndex--
                 }
-                state.cardIndex++
             }
         },
         // 重开游戏
         handleRestart(state) {
             state.gameIsEnd = false;
             state.cardIndex = 0;
+            state.cardEndIndex = 135;
             state.currentIndex = -1;
-            state.contendIndex = []
+            state.contendIndex = [];
+            state.lastOut = undefined;
             state.players = [basePlayer(0), basePlayer(1), basePlayer(2), basePlayer(3)];
         },
         // 更新位置
@@ -184,6 +203,81 @@ export const gameSlice = createSlice({
             }
         },
 
+        updateQuadruple(state, {payload}) {
+            const index = payload.index;
+            const type = payload.type;
+            const player = state.players[index];
+            if (type === 'self') {
+
+            } else {
+                const has = player.cards.filter(v => v.num === state.lastOut!.num);
+                player.cards = player.cards.filter(v => v.num !== state.lastOut!.num);
+                player.immovable.push([state.lastOut!, ...has])
+                state.lastOut = undefined
+                state.contendIndex = []
+            }
+            state.currentIndex = index - 1
+        },
+
+        handleTriplet(state, {payload}) {
+            const index = payload.index;
+            const player = state.players[index];
+            const has = player.cards.filter(v => v.num === state.lastOut!.num);
+            player.cards = player.cards.filter(v => v.num !== state.lastOut!.num);
+            const newVar = [state.lastOut!];
+            let i = 0
+            for (; i < 2; i++) {
+                newVar.push(has[i])
+            }
+            for (; i < has.length; i++) {
+                player.cards.push(has[i])
+            }
+            player.cards.sort((a, b) => a.card - b.card)
+            player.immovable.push(newVar)
+            state.contendIndex = []
+            state.lastOut = undefined
+            state.currentIndex = index
+        },
+
+        handleStraight(state, {payload}) {
+            const index = payload.index;
+            const player = state.players[index];
+            const pairs = payload.pairs;
+
+            const has = player.cards.filter(v => pairs.indexOf(v.num) !== -1);
+            player.cards = player.cards.filter(v => pairs.indexOf(v.num) === -1);
+            const newVar = [state.lastOut!, ...has].sort((a, b) => a.num - b.num);
+            player.immovable.push(newVar)
+            state.lastOut = undefined
+            state.contendIndex = []
+            state.currentIndex = index
+        },
+        updateNoContend(state, {payload}) {
+            const index = payload.index;
+            const player = state.players[index];
+            state.players[state.currentIndex].outer.push(state.lastOut!)
+            state.lastOut = undefined
+            state.contendIndex = state.contendIndex.splice(0, 1)
+        },
+
+        handleWin(state, {payload}) {
+            state.gameIsEnd = true
+            const index = payload.index;
+            const type = payload.type;
+            const player = state.players[index];
+            player.isWin = true
+            if (type === "self") {
+                console.log("自摸了")
+                player.cards.push(player.enter!)
+                player.enter = undefined;
+            } else {
+                console.log("和了")
+                player.cards.push(state.lastOut!)
+                state.lastOut = undefined
+            }
+            player.cards.sort((a, b) => a.card - b.card)
+        },
+
         handleSelectCard(state, {payload}) {
             const {card, seat} = payload;
             const self = state.players[seat]
@@ -206,6 +300,11 @@ export const {
     updateOutCard,
     updateContend,
     handleSelectCard,
+    updateQuadruple,
+    handleTriplet,
+    handleStraight,
+    updateNoContend,
+    handleWin
 } = gameSlice.actions
 
 export default gameSlice.reducer
@@ -213,7 +312,7 @@ export default gameSlice.reducer
 export const startRound = (cards: number[]) => (d: Dispatch) => {
     d(updateCards(cards))
     for (let i = 0; i < 53; i++) {
-        d(touchCard())
+        d(touchCard(true))
     }
     d(updateStrategy())
 }
@@ -221,5 +320,15 @@ export const startRound = (cards: number[]) => (d: Dispatch) => {
 export const handleOutCard = (card: number) => (d: Dispatch) => {
     d(updateOutCard(card))
     d(updateContend())
-    d(touchCard())
+    d(touchCard(true))
+}
+
+export const handleNoContend = (info: any) => (d: Dispatch) => {
+    d(updateNoContend(info))
+    d(touchCard(true))
+}
+
+export const handleQuadruple = (info: any) => (d: Dispatch) => {
+    d(updateQuadruple(info))
+    d(touchCard(false))
 }

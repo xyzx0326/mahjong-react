@@ -1,5 +1,5 @@
 import {boardScale, BoardSizeType} from "@/config/board";
-import {Player} from "@/stores/game";
+import {CardType, Player} from "@/stores/game";
 import React, {useMemo} from "react";
 import {Group, Layer, Rect, Text} from "react-konva";
 import Card from "../card";
@@ -7,6 +7,7 @@ import Card from "../card";
 export type SeatProps = {
     player: Player
     maxPlayer: number
+    lastOut?: CardType
     currentIndex: number
     selfIndex: number
     boardSize: BoardSizeType
@@ -43,7 +44,7 @@ const seat = (board: number, boardSize: BoardSizeType) => {
 }
 
 
-const Seat: React.FC<SeatProps> = ({player, maxPlayer, currentIndex, selfIndex, boardSize, onCardSelect}) => {
+const Seat: React.FC<SeatProps> = ({player, maxPlayer, currentIndex, lastOut, selfIndex, boardSize, onCardSelect}) => {
     const {width, height, direction} = boardSize
     const board = direction === 1 ? height : width;
     const brandBoard = board / 3;
@@ -56,15 +57,16 @@ const Seat: React.FC<SeatProps> = ({player, maxPlayer, currentIndex, selfIndex, 
     const outerCard = boardScale(boardSize, 0.9);
     const {xEdge, yEdge, rotation} = seat(board, scaleBoard)[seatIndex]
     const seatInfo = ["东", "南", "西", "北"];
+    console.log(immovable)
     let immovableOffset = useMemo(() => immovable.reduce((value: number, cards) => {
         return value + cards.reduce((value: number, card) => {
-            const add = (card.direction === 1) ? immovableCard.cardHeight : immovableCard.cardWidth
+            const add = (card.direction && card.direction === 1) ? immovableCard.cardHeight : immovableCard.cardWidth
             return value + add;
         }, 0)
     }, 0), [immovable]);
 
-    const immovableCards = immovable.map((cards) => {
-        return <Group y={cardHeight - immovableCard.cardHeight}>
+    const immovableCards = immovable.map((cards, index) => {
+        return <Group key={index} y={cardHeight - immovableCard.cardHeight}>
             {cards.map((card, index) => {
                 const ret = <Card key={index}
                                   num={card.num}
@@ -88,7 +90,14 @@ const Seat: React.FC<SeatProps> = ({player, maxPlayer, currentIndex, selfIndex, 
 
     let outerOffset = 0;
 
-    const outerCards = outer.map((card, index) => {
+    let outerNew
+    if (lastOut && currentIndex === player.index) {
+        outerNew = [lastOut, ...outer]
+    } else {
+        outerNew = outer
+    }
+
+    const outerCards = outerNew.map((card, index) => {
         if (index % 6 == 0) {
             outerOffset = 0;
         }

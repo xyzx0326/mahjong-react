@@ -33,7 +33,7 @@ export const winRules = {
         const ret = []
         for (let key in cardMap) {
             if (cardMap[key] === 3) {
-                ret.push({type:'quadruple', card: parseInt(key)})
+                ret.push({type: 'quadruple', card: parseInt(key)})
             }
         }
         return ret;
@@ -44,7 +44,7 @@ export const winRules = {
         const ret = []
         for (let key in cardMap) {
             if (cardMap[key] == 2) {
-                ret.push({type:'triplet', card: parseInt(key)})
+                ret.push({type: 'triplet', card: parseInt(key)})
             }
         }
         return ret;
@@ -64,22 +64,28 @@ export const winRules = {
         for (let i = 1; i < cardList.length; i++) {
             if (cardList[i - 1] + 1 === cardList[i]) {
                 const number1 = cardList[i - 1] - 1;
-                if (!set[number1]) {
-                    set[number1] = 1
-                    ret.push({card: number1, type: 'straight'})
+                const items1 = {card: number1, type: 'straight', paris: [cardList[i - 1], cardList[i]]};
+                const key1 = JSON.stringify(items1);
+                if (!set[key1]) {
+                    set[key1] = 1
+                    ret.push(items1)
                 }
                 const number2 = cardList[i] + 1;
-                if (!set[number2]) {
-                    set[number2] = 1
-                    ret.push({card: number2, type: 'straight'})
+                const items2 = {card: number2, type: 'straight', paris: [cardList[i - 1], cardList[i]]};
+                const key2 = JSON.stringify(items1);
+                if (!set[key2]) {
+                    set[key2] = 1
+                    ret.push(items2)
                 }
             }
             for (let j = 1; j < 5; j++) {
                 if (i - j >= 0 && cardList[i - j] + 2 === cardList[i]) {
                     const number = cardList[i] - 1;
-                    if (!set[number]) {
-                        set[number] = 1
-                        ret.push({card: number, type: 'straight'})
+                    const items = {card: number, type: 'straight', paris: [cardList[i - j], cardList[i]]};
+                    const key = JSON.stringify(items);
+                    if (!set[key]) {
+                        set[key] = 1
+                        ret.push(items)
                     }
                 }
             }
