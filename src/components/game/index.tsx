@@ -13,10 +13,12 @@ type GameProps = {
     players: Player[]
     leftCount: number
     currentIndex: number
+    contendIndex: number[]
     selfIndex: number
     boardSize: BoardSizeType
-    lastOut?:CardType
+    lastOut?: CardType
     ops?: any[]
+    gameIsEnd: boolean
 
     onCardSelect?: (card: number, seat: number) => void;
 }
@@ -24,8 +26,10 @@ type GameProps = {
 const Game: React.FC<GameProps> = ({
                                        players,
                                        currentIndex,
+                                       contendIndex,
                                        selfIndex,
                                        boardSize,
+                                       gameIsEnd,
                                        leftCount,
                                        onCardSelect,
                                        lastOut,
@@ -40,9 +44,11 @@ const Game: React.FC<GameProps> = ({
     return (
         <Stage width={board} height={board}>
             <Board boardSize={boardSize}/>
-            <Brand leftCount={leftCount} boardSize={boardSize}/>
+            <Brand leftCount={leftCount} boardSize={boardSize} gameIsEnd={gameIsEnd}/>
             {players.map((player, index) => {
-                return <Seat currentIndex={currentIndex} lastOut={lastOut}
+                return <Seat currentIndex={currentIndex}
+                             gameIsEnd={gameIsEnd}
+                             contendIndex={contendIndex} lastOut={lastOut}
                              selfIndex={selfIndex} maxPlayer={players.length}
                              key={index} player={player} boardSize={boardSize}
                              onCardSelect={onCardSelect}/>

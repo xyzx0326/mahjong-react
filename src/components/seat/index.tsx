@@ -8,6 +8,8 @@ export type SeatProps = {
     player: Player
     maxPlayer: number
     lastOut?: CardType
+    gameIsEnd: boolean
+    contendIndex: number[]
     currentIndex: number
     selfIndex: number
     boardSize: BoardSizeType
@@ -44,7 +46,16 @@ const seat = (board: number, boardSize: BoardSizeType) => {
 }
 
 
-const Seat: React.FC<SeatProps> = ({player, maxPlayer, currentIndex, lastOut, selfIndex, boardSize, onCardSelect}) => {
+const Seat: React.FC<SeatProps> = ({
+                                       player, maxPlayer,
+                                       currentIndex,
+                                       lastOut,
+                                       gameIsEnd,
+                                       contendIndex,
+                                       selfIndex,
+                                       boardSize,
+                                       onCardSelect
+                                   }) => {
     const {width, height, direction} = boardSize
     const board = direction === 1 ? height : width;
     const brandBoard = board / 3;
@@ -57,13 +68,13 @@ const Seat: React.FC<SeatProps> = ({player, maxPlayer, currentIndex, lastOut, se
     const outerCard = boardScale(boardSize, 0.9);
     const {xEdge, yEdge, rotation} = seat(board, scaleBoard)[seatIndex]
     const seatInfo = ["东", "南", "西", "北"];
-    console.log(immovable)
     let immovableOffset = useMemo(() => immovable.reduce((value: number, cards) => {
         return value + cards.reduce((value: number, card) => {
             const add = (card.direction && card.direction === 1) ? immovableCard.cardHeight : immovableCard.cardWidth
             return value + add;
         }, 0)
     }, 0), [immovable]);
+    const isContend = contendIndex.length > 0 && contendIndex[0] === player.index;
 
     const immovableCards = immovable.map((cards, index) => {
         return <Group key={index} y={cardHeight - immovableCard.cardHeight}>
@@ -87,6 +98,7 @@ const Seat: React.FC<SeatProps> = ({player, maxPlayer, currentIndex, lastOut, se
             })}
         </Group>;
     });
+
 
     let outerOffset = 0;
 
@@ -137,11 +149,11 @@ const Seat: React.FC<SeatProps> = ({player, maxPlayer, currentIndex, lastOut, se
             y={-brandBoard + cardHeight - boardSize.cardHeight * 9 / 10 - boardEdge / 40}
             height={boardSize.cardHeight * 9 / 10}
             width={boardSize.cardHeight * 9 / 10}
-            stroke={currentIndex === player.index ? "lightgreen" : "#fff"}
+            stroke={isContend ? "Red" : currentIndex === player.index ? "lightgreen" : "#fff"}
             strokeWidth={boardEdge / 40}
             cornerRadius={boardEdge / 20}
         />
-        <Text text={seatInfo[player.index]}
+        <Text text={gameIsEnd && player.isWin ? "赢" : seatInfo[player.index]}
               x={brandBoard - boardEdge + boardSize.cardHeight / 5 + boardEdge / 40}
               y={-brandBoard + cardHeight - boardSize.cardHeight / 2 - boardSize.cardHeight / 6 - boardEdge / 40}
               fill="#fff"

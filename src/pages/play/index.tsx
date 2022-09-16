@@ -139,7 +139,9 @@ const Play = () => {
                     <Game
                         lastOut={game.lastOut}
                         selfIndex={game.selfIndex}
+                        gameIsEnd={game.gameIsEnd}
                         currentIndex={game.currentIndex}
+                        contendIndex={game.contendIndex}
                         leftCount={game.cardEndIndex - game.cardIndex + 1}
                         boardSize={boardSize}
                         players={game.players}

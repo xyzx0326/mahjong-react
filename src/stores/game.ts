@@ -147,7 +147,6 @@ export const gameSlice = createSlice({
             const card = payload;
             const player = state.players[state.currentIndex]
             if (player.enter && player.enter?.card === card) {
-                player.outer.push(player.enter)
                 state.lastOut = player.enter
                 player.enter = undefined;
             } else {
@@ -253,11 +252,13 @@ export const gameSlice = createSlice({
             state.currentIndex = index
         },
         updateNoContend(state, {payload}) {
-            const index = payload.index;
-            const player = state.players[index];
-            state.players[state.currentIndex].outer.push(state.lastOut!)
-            state.lastOut = undefined
-            state.contendIndex = state.contendIndex.splice(0, 1)
+            // const index = payload.index;
+            // const player = state.players[index];
+            state.contendIndex.splice(0, 1)
+            if (state.contendIndex.length === 0) {
+                state.players[state.currentIndex].outer.push(state.lastOut!)
+                state.lastOut = undefined
+            }
         },
 
         handleWin(state, {payload}) {

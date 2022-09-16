@@ -5,16 +5,18 @@ import {Group, Layer, Rect, Text} from "react-konva";
 
 type BrandProps = {
     leftCount: number
+    gameIsEnd: boolean
     boardSize: BoardSizeType;
 }
 
 
-const Brand: React.FC<BrandProps> = ({leftCount, boardSize}) => {
+const Brand: React.FC<BrandProps> = ({leftCount, gameIsEnd, boardSize}) => {
     const {width, height, direction} = boardSize;
 
     const board = direction === 1 ? height : width;
     const brandBoard = board / 3;
 
+    const text = gameIsEnd ? '结束' : `余 ${leftCount}`;
     return (
         <Layer>
             <Rect
@@ -53,7 +55,7 @@ const Brand: React.FC<BrandProps> = ({leftCount, boardSize}) => {
                     y={-brandBoard / 30}
                     width={brandBoard / 3}
                     height={brandBoard / 3}
-                    text={`余 ${leftCount}`}
+                    text={text}
                     fontSize={brandBoard * 0.09}
                     verticalAlign={"bottom"}
                     align={"center"}
