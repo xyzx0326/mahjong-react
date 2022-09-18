@@ -36,6 +36,11 @@ export const winRules = {
                 ret.push({type: 'quadruple', card: parseInt(key)})
             }
         }
+        player.immovable.forEach(im => {
+            if (im.length === 3 && im[0].num === im[1].num && im[1].num === im[2].num) {
+                ret.push({type: 'quadruple', card: im[0].num, extra: 'add'})
+            }
+        })
         return ret;
     },
     // 刻子
@@ -63,16 +68,14 @@ export const winRules = {
         const set: any = {}
         for (let i = 1; i < cardList.length; i++) {
             if (cardList[i - 1] + 1 === cardList[i]) {
-                const number1 = cardList[i - 1] - 1;
-                const items1 = {card: number1, type: 'straight', paris: [cardList[i - 1], cardList[i]]};
+                const items1 = {card: cardList[i - 1] - 1, type: 'straight', pairs: [cardList[i - 1], cardList[i]]};
                 const key1 = JSON.stringify(items1);
                 if (!set[key1]) {
                     set[key1] = 1
                     ret.push(items1)
                 }
-                const number2 = cardList[i] + 1;
-                const items2 = {card: number2, type: 'straight', paris: [cardList[i - 1], cardList[i]]};
-                const key2 = JSON.stringify(items1);
+                const items2 = {card: cardList[i] + 1, type: 'straight', pairs: [cardList[i - 1], cardList[i]]};
+                const key2 = JSON.stringify(items2);
                 if (!set[key2]) {
                     set[key2] = 1
                     ret.push(items2)
@@ -81,7 +84,7 @@ export const winRules = {
             for (let j = 1; j < 5; j++) {
                 if (i - j >= 0 && cardList[i - j] + 2 === cardList[i]) {
                     const number = cardList[i] - 1;
-                    const items = {card: number, type: 'straight', paris: [cardList[i - j], cardList[i]]};
+                    const items = {card: number, type: 'straight', pairs: [cardList[i - j], cardList[i]]};
                     const key = JSON.stringify(items);
                     if (!set[key]) {
                         set[key] = 1
@@ -92,6 +95,7 @@ export const winRules = {
         }
         return ret.filter(v => cardSinge.indexOf(v.card) != -1)
     },
+
     // 基础赢法
     win: (player: Player): Strategy[] => {
         const immovable = player.immovable.length;
@@ -135,6 +139,25 @@ export const winRules = {
             }
         }
         return win
+    },
+    unparalleled: (player: Player): Strategy[] => {
+        const winCard = [1, 9, 11, 19, 21, 29, 31, 33, 35, 37, 39, 41, 43]
+        const cards = player.cards.map(v => v.num);
+        const numbers = cards.filter(v => winCard.indexOf(v) === -1);
+        if (numbers.length != 0) {
+            return [];
+        }
+        const number = winCard.find(v => cards.indexOf(v) === -1);
+        if (number) {
+            return [{type: 'win', card: number, extra: "unparalleled"}]
+        }
+        return winCard.map(v => {
+                return {type: 'win', card: v, extra: "unparalleled"}
+            }
+        );
+    },
+    sevenPairs:  (player: Player): Strategy[] => {
+        return []
     }
 }
 

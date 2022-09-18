@@ -42,27 +42,30 @@ const Game: React.FC<GameProps> = ({
     let opOffset = 0;
 
     return (
-        <Stage width={board} height={board}>
-            <Board boardSize={boardSize}/>
-            <Brand leftCount={leftCount} boardSize={boardSize} gameIsEnd={gameIsEnd}/>
-            {players.map((player, index) => {
-                return <Seat currentIndex={currentIndex}
-                             gameIsEnd={gameIsEnd}
-                             contendIndex={contendIndex} lastOut={lastOut}
-                             selfIndex={selfIndex} maxPlayer={players.length}
-                             key={index} player={player} boardSize={boardSize}
-                             onCardSelect={onCardSelect}/>
-            })}
+        <Stage width={width} height={height}>
             <Layer>
+                <Board boardSize={boardSize}/>
+                <Brand leftCount={leftCount} boardSize={boardSize} gameIsEnd={gameIsEnd}/>
+                <Group>
+                    {players.map((player, index) => {
+                        return <Seat currentIndex={currentIndex}
+                                     gameIsEnd={gameIsEnd}
+                                     contendIndex={contendIndex} lastOut={lastOut}
+                                     selfIndex={selfIndex} maxPlayer={players.length}
+                                     key={index} player={player} boardSize={boardSize}
+                                     onCardSelect={onCardSelect}/>
+                    })}
+                </Group>
                 <Group
                     x={boardEdge}
                     y={board - boardSize.cardHeight * 2}
                     height={boardSize.cardWidth}
                     width={opWidth}
                 >
-                    {ops?.map((op: any) => <Operate key={op.text} text={op.text} op={op.op}
-                                                    x={opOffset++ * boardSize.cardHeight * 2}
-                                                    boardSize={boardSize}/>)}
+                    {ops?.map((op: any, index) => <Operate key={index} text={op.text} op={op.op}
+                                                           pairs={op.pairs}
+                                                           x={opOffset++ * boardSize.cardHeight * 2}
+                                                           boardSize={boardSize}/>)}
                 </Group>
             </Layer>
         </Stage>

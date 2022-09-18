@@ -22,7 +22,8 @@ export type Player = {
 export type Strategy = {
     card: number;
     type: string;
-    pairs?: number[]
+    pairs?: number[];
+    extra?: string
 }
 
 export type GameFrameData = {
@@ -78,16 +79,27 @@ export const gameSlice = createSlice({
         updateCards(state, {payload}) {
             state.cards = payload;
         },
+        updateColl(state) {
+            state.players[1].cards = [{num: 1, card: 1}, {num: 9, card: 2},
+                {num: 11, card: 3}, {num: 19, card:4},
+                {num: 21, card: 5}, {num: 29, card: 6},
+                {num: 31, card: 7}, {num: 33, card: 8},
+                {num: 35, card: 10}, {num: 37, card: 9},
+                {num: 39, card: 12}, {num: 41, card: 13}, {num: 41, card: 14}]
+        },
         // 更新策略
         updateStrategy(state) {
-            const start = new Date().getTime();
             for (let i = 0; i < state.players.length; i++) {
                 const player = state.players[i];
                 player.cards.sort((a, b) => a.num - b.num)
-                player.strategy = [...winRules.win(player), ...winRules.quadruple(player), ...winRules.triplet(player), ...winRules.straight(player)]
+                let strategy: Strategy[] = []
+                for (let key in winRules) {
+                    console.log(key)
+                    strategy = [...strategy, ...winRules[key as keyof typeof winRules](player)]
+                }
+                player.strategy = strategy
+                console.log(JSON.parse(JSON.stringify(state.players)))
             }
-            const end = new Date().getTime();
-            console.log("time" + (end - start), end)
         },
         // 摸一张 true从头 false从尾
         touchCard(state, {payload}) {
@@ -177,7 +189,7 @@ export const gameSlice = createSlice({
                     continue;
                 }
                 const pi = state.players[i];
-                if (pi.strategy.find(v => v.type === 'quadruple' && v.card === state.lastOut?.num)) {
+                if (pi.strategy.find(v => v.type === 'quadruple' && !v.extra && v.card === state.lastOut?.num)) {
                     state.contendIndex.push(i)
                     break;
                 }
@@ -207,14 +219,21 @@ export const gameSlice = createSlice({
             const type = payload.type;
             const player = state.players[index];
             if (type === 'self') {
-
-            } else {
+                const has = player.cards.filter(v => v.num === player.enter!.num);
+                player.cards = player.cards.filter(v => v.num !== player.enter!.num);
+                player.immovable.push([state.lastOut!, ...has])
+                player.enter = undefined;
+            } else if (type === 'other') {
                 const has = player.cards.filter(v => v.num === state.lastOut!.num);
                 player.cards = player.cards.filter(v => v.num !== state.lastOut!.num);
                 player.immovable.push([state.lastOut!, ...has])
                 state.lastOut = undefined
-                state.contendIndex = []
+            } else if (type === "add") {
+                let find = player.immovable.find(v => v[0].num === player.enter!.num);
+                find!.push(player.enter!)
+                player.enter = undefined;
             }
+            state.contendIndex = []
             state.currentIndex = index - 1
         },
 
@@ -242,9 +261,14 @@ export const gameSlice = createSlice({
             const index = payload.index;
             const player = state.players[index];
             const pairs = payload.pairs;
-
-            const has = player.cards.filter(v => pairs.indexOf(v.num) !== -1);
-            player.cards = player.cards.filter(v => pairs.indexOf(v.num) === -1);
+            const has = [];
+            for (let i = 0; i < pairs.length; i++) {
+                let item = player.cards.find(v => pairs[i] === v.num);
+                if (item) {
+                    has.push(item);
+                    player.cards = player.cards.filter(v => v.card !== item!.card);
+                }
+            }
             const newVar = [state.lastOut!, ...has].sort((a, b) => a.num - b.num);
             player.immovable.push(newVar)
             state.lastOut = undefined
@@ -268,11 +292,9 @@ export const gameSlice = createSlice({
             const player = state.players[index];
             player.isWin = true
             if (type === "self") {
-                console.log("自摸了")
                 player.cards.push(player.enter!)
                 player.enter = undefined;
             } else {
-                console.log("和了")
                 player.cards.push(state.lastOut!)
                 state.lastOut = undefined
             }
@@ -282,7 +304,7 @@ export const gameSlice = createSlice({
         handleSelectCard(state, {payload}) {
             const {card, seat} = payload;
             const self = state.players[seat]
-            if (self.select) {
+            if (self.select === card) {
                 self.select = undefined;
             } else {
                 self.select = card
@@ -305,7 +327,8 @@ export const {
     handleTriplet,
     handleStraight,
     updateNoContend,
-    handleWin
+    handleWin,
+    updateColl
 } = gameSlice.actions
 
 export default gameSlice.reducer
@@ -315,6 +338,7 @@ export const startRound = (cards: number[]) => (d: Dispatch) => {
     for (let i = 0; i < 53; i++) {
         d(touchCard(true))
     }
+    d(updateColl())
     d(updateStrategy())
 }
 
@@ -322,14 +346,17 @@ export const handleOutCard = (card: number) => (d: Dispatch) => {
     d(updateOutCard(card))
     d(updateContend())
     d(touchCard(true))
+    d(updateStrategy())
 }
 
 export const handleNoContend = (info: any) => (d: Dispatch) => {
     d(updateNoContend(info))
     d(touchCard(true))
+    d(updateStrategy())
 }
 
 export const handleQuadruple = (info: any) => (d: Dispatch) => {
     d(updateQuadruple(info))
     d(touchCard(false))
+    d(updateStrategy())
 }

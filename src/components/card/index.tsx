@@ -12,7 +12,7 @@ type CardProps = {
     y: number;
     hide?: boolean;
     boardSize: BoardSizeType;
-    seatIndex: number;
+    seatIndex?: number;
     direction?: number;
     isSelect?: boolean;
     onSelect?: (num: number) => void;
@@ -23,7 +23,7 @@ const Card: React.FC<CardProps> = ({
                                        card,
                                        x, y,
                                        boardSize,
-                                       seatIndex,
+                                       seatIndex = 0,
                                        hide,
                                        direction = 0,
                                        isSelect,

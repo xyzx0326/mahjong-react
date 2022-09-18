@@ -66,7 +66,7 @@ const Play = () => {
         if (seat !== game.selfIndex) {
             return
         }
-        if (self.select && game.currentIndex === game.selfIndex) {
+        if (self.select === card && game.currentIndex === game.selfIndex) {
             remoteGo(handleOutCard(card))
         } else {
             go(handleSelectCard({card, seat}))
@@ -76,52 +76,72 @@ const Play = () => {
     const inCard = self.enter && self.enter.num;
 
     const winSelf = self.strategy.find(v => v.card === inCard && v.type === 'win');
+    const quadrupleSelf = self.strategy.filter(v => v.card === inCard && v.type === 'quadruple');
 
     const lastOutCard = game.lastOut && game.lastOut.num;
     let ops: any = []
 
-    if (game.contendIndex.length > 0 && game.contendIndex[0] === game.selfIndex) {
-        self.strategy.filter(v => v.card === lastOutCard).map(v => {
-            if (v.type === "win") {
-                ops.push({
-                    text: "和", op: () => {
-                        remoteGo(handleWin({index: game.selfIndex, type: "winOther"}))
-                    }
-                })
-            } else if (v.type === "quadruple") {
-                ops.push({
-                    text: "杠", op: () => {
-                        remoteGo(handleQuadruple({index: game.selfIndex}))
-                    }
-                })
-            } else if (v.type === "triplet") {
-                ops.push({
-                    text: "碰", op: () => {
-                        remoteGo(handleTriplet({index: game.selfIndex}))
-                    }
-                })
-            } else if (v.type === "straight") {
-                ops.push({
-                    text: "吃", op: () => {
-                        remoteGo(handleStraight({index: game.selfIndex}))
-                    }
-                })
-            }
-        })
-    }
-    if (ops.length > 0) {
-        ops.push({
-            text: "不要", op: () => {
-                remoteGo(handleNoContend({index: game.selfIndex}))
-            }
-        })
-    }
-    if (winSelf) {
-        ops = [{
-            text: "自摸", op: () => {
-                remoteGo(handleWin({index: game.selfIndex, type: "winSelf"}))
-            }
-        }, ...ops]
+    if (online.isPlayer) {
+        if (game.contendIndex.length > 0 && game.contendIndex[0] === game.selfIndex) {
+            self.strategy.filter(v => v.card === lastOutCard).map(v => {
+                if (v.type === "win") {
+                    ops.push({
+                        text: "和", op: () => {
+                            remoteGo(handleWin({index: game.selfIndex, type: "other"}))
+                        }
+                    })
+                } else if (v.type === "quadruple") {
+                    ops.push({
+                        text: "杠", op: () => {
+                            remoteGo(handleQuadruple({index: game.selfIndex}))
+                        }
+                    })
+                } else if (v.type === "triplet") {
+                    ops.push({
+                        text: "碰", op: () => {
+                            remoteGo(handleTriplet({index: game.selfIndex}))
+                        }
+                    })
+                } else if (v.type === "straight" && (game.currentIndex + 1) % game.rule.maxPlayer === game.selfIndex) {
+                    ops.push({
+                        text: "吃", pairs: v.pairs, op: () => {
+                            remoteGo(handleStraight({index: game.selfIndex, pairs: v.pairs}))
+                        }
+                    })
+                }
+            })
+        }
+        if (quadrupleSelf.length > 0) {
+            quadrupleSelf.forEach(q => {
+                if (q.extra) {
+                    ops.push({
+                        text: "杠", op: () => {
+                            remoteGo(handleQuadruple({index: game.selfIndex, type: q.extra}))
+                        }
+                    })
+                } else {
+                    ops.push({
+                        text: "杠", op: () => {
+                            remoteGo(handleQuadruple({index: game.selfIndex, type: 'self'}))
+                        }
+                    })
+                }
+            })
+        }
+        if (ops.length > 0) {
+            ops.push({
+                text: "不要", op: () => {
+                    remoteGo(handleNoContend({index: game.selfIndex}))
+                }
+            })
+        }
+        if (winSelf) {
+            ops = [{
+                text: "自摸", op: () => {
+                    remoteGo(handleWin({index: game.selfIndex, type: "self"}))
+                }
+            }, ...ops]
+        }
     }
 
     return (
@@ -135,7 +155,7 @@ const Play = () => {
                         </button>
                     </div>
                 </div>
-                <div className="board-body" style={{height: `${boardSize.width}px`}}>
+                <div className="board-body" style={{height: `${boardSize.height}px`}}>
                     <Game
                         lastOut={game.lastOut}
                         selfIndex={game.selfIndex}

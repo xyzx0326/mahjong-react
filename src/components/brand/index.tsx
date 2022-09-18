@@ -1,7 +1,7 @@
 import {BoardSizeType} from "@/config/board";
 import React from 'react';
 
-import {Group, Layer, Rect, Text} from "react-konva";
+import {Group, Rect, Text} from "react-konva";
 
 type BrandProps = {
     leftCount: number
@@ -18,7 +18,7 @@ const Brand: React.FC<BrandProps> = ({leftCount, gameIsEnd, boardSize}) => {
 
     const text = gameIsEnd ? '结束' : `余 ${leftCount}`;
     return (
-        <Layer>
+        <Group>
             <Rect
                 x={brandBoard}
                 y={brandBoard}
@@ -62,7 +62,7 @@ const Brand: React.FC<BrandProps> = ({leftCount, gameIsEnd, boardSize}) => {
                     fill="#fff"
                 />
             </Group>
-        </Layer>
+        </Group>
     );
 }
 

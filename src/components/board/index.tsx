@@ -1,10 +1,9 @@
 import white from "@/assets/test2.gif";
 import {BoardSizeType} from "@/config/board";
 import "gifler";
-import Konva from "konva";
 import React, {useEffect} from 'react';
 
-import {Group, Image as KImage, Layer, Rect} from "react-konva";
+import {Group, Rect} from "react-konva";
 
 type BoardProps = {
     boardSize: BoardSizeType;
@@ -42,13 +41,28 @@ const Board: React.FC<BoardProps> = ({boardSize}) => {
     }, [])
 
     return (
-        <Layer>
+        <Group>
             <Rect
                 width={board}
                 height={board}
-                fill='#72a7b7'
+                fill='#4e72b8'
                 cornerRadius={boardSize.boardEdge / 10}
             />
+            {direction === 1 ?
+                <Rect
+                    x={board + 1}
+                    width={width - height - 1}
+                    height={height}
+                    fill={"#faa755"}
+                    cornerRadius={boardSize.boardEdge / 10}
+                /> :
+                <Rect
+                    y={board + 1}
+                    width={width}
+                    height={height - width - 1}
+                    fill={"#faa755"}
+                    cornerRadius={boardSize.boardEdge / 10}
+                />}
             {/*<KImage ref={imageRef}*/}
             {/*        image={canvas}*/}
             {/*        y={width / 6}*/}
@@ -56,7 +70,7 @@ const Board: React.FC<BoardProps> = ({boardSize}) => {
             {/*        height={width / 3 * 2}/>*/}
             <Group x={board} y={board}>
             </Group>
-        </Layer>
+        </Group>
     );
 }
 
