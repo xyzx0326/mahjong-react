@@ -81,25 +81,40 @@ export const gameSlice = createSlice({
         },
         updateColl(state) {
             state.players[1].cards = [{num: 1, card: 1}, {num: 9, card: 2},
-                {num: 11, card: 3}, {num: 19, card:4},
+                {num: 11, card: 3}, {num: 19, card: 4},
                 {num: 21, card: 5}, {num: 29, card: 6},
                 {num: 31, card: 7}, {num: 33, card: 8},
                 {num: 35, card: 10}, {num: 37, card: 9},
-                {num: 39, card: 12}, {num: 41, card: 13}, {num: 41, card: 14}]
+                {num: 39, card: 12}, {num: 41, card: 13}, {num: 43, card: 14}]
         },
         // 更新策略
         updateStrategy(state) {
             for (let i = 0; i < state.players.length; i++) {
-                const player = state.players[i];
+                let player = JSON.parse(JSON.stringify(state.players[i])) as Player;
+                let len = player.cards.length + 2
+                if (player.enter) {
+                    len = len + 1;
+                }
+                if (player.select) {
+                    len = len - 1;
+                }
+                // 可以算牌的情况
+                if (len % 3 === 0) {
+                    if (player.enter) {
+                        player.cards.push(player.enter);
+                    }
+                    if (player.select) {
+                        player.cards = player.cards.filter(v => v.card !== player.select)
+                    }
+                }
                 player.cards.sort((a, b) => a.num - b.num)
                 let strategy: Strategy[] = []
                 for (let key in winRules) {
-                    console.log(key)
                     strategy = [...strategy, ...winRules[key as keyof typeof winRules](player)]
                 }
-                player.strategy = strategy
-                console.log(JSON.parse(JSON.stringify(state.players)))
+                state.players[i].strategy = strategy
             }
+            // console.log(JSON.parse(JSON.stringify(state.players)))
         },
         // 摸一张 true从头 false从尾
         touchCard(state, {payload}) {
@@ -276,8 +291,6 @@ export const gameSlice = createSlice({
             state.currentIndex = index
         },
         updateNoContend(state, {payload}) {
-            // const index = payload.index;
-            // const player = state.players[index];
             state.contendIndex.splice(0, 1)
             if (state.contendIndex.length === 0) {
                 state.players[state.currentIndex].outer.push(state.lastOut!)
@@ -301,7 +314,7 @@ export const gameSlice = createSlice({
             player.cards.sort((a, b) => a.card - b.card)
         },
 
-        handleSelectCard(state, {payload}) {
+        updateSelectCard(state, {payload}) {
             const {card, seat} = payload;
             const self = state.players[seat]
             if (self.select === card) {
@@ -322,7 +335,7 @@ export const {
     updateSelfIndex,
     updateOutCard,
     updateContend,
-    handleSelectCard,
+    updateSelectCard,
     updateQuadruple,
     handleTriplet,
     handleStraight,
@@ -358,5 +371,10 @@ export const handleNoContend = (info: any) => (d: Dispatch) => {
 export const handleQuadruple = (info: any) => (d: Dispatch) => {
     d(updateQuadruple(info))
     d(touchCard(false))
+    d(updateStrategy())
+}
+
+export const handleSelectCard = (info: any) => (d: Dispatch) => {
+    d(updateSelectCard(info))
     d(updateStrategy())
 }
