@@ -5,7 +5,7 @@ import {defineConfig} from 'vite'
 // https://vitejs.dev/config/
 export default defineConfig(() => {
     return {
-        base: '/',
+        base: '/mahjong/',
         plugins: [react()],
         resolve: {
             alias: {
@@ -30,6 +30,10 @@ export default defineConfig(() => {
         },
         server: {
             host: '0.0.0.0',
+            fs: {
+                // 可以为项目根目录的上一级提供服务
+                allow: ['..']
+            }
         }
     }
 })
