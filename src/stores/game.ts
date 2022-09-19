@@ -352,7 +352,7 @@ export const startRound = (cards: number[]) => (d: Dispatch) => {
     for (let i = 0; i < 53; i++) {
         d(touchCard(true))
     }
-    d(updateColl())
+    // d(updateColl())
     d(updateStrategy())
 }
 
