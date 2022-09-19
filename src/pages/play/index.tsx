@@ -66,7 +66,7 @@ const Play = () => {
         if (seat !== game.selfIndex) {
             return
         }
-        if (self.select && game.currentIndex === game.selfIndex) {
+        if (self.select && game.currentIndex === game.selfIndex && game.contendIndex.length === 0) {
             remoteGo(handleOutCard(card))
         } else {
             go(handleSelectCard({card, seat}))
