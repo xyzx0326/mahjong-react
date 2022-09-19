@@ -13,6 +13,8 @@ type OperateProps = {
 
 
 const Operate: React.FC<OperateProps> = ({text, x, boardSize, op, pairs = []}) => {
+    const {width, height, direction} = boardSize
+    const board = direction === 1 ? height : width;
     return <Group x={x}
                   onTap={() => op()}
                   onClick={() => op()}>
@@ -29,7 +31,7 @@ const Operate: React.FC<OperateProps> = ({text, x, boardSize, op, pairs = []}) =
         <Rect
             width={boardSize.cardWidth * 2}
             height={boardSize.cardWidth}
-            cornerRadius={boardSize.boardEdge / 20}
+            cornerRadius={board / 100}
             fill="#000"
             opacity={0.5}
             shadowColor="#000"

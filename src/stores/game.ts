@@ -113,6 +113,7 @@ export const gameSlice = createSlice({
                     strategy = [...strategy, ...winRules[key as keyof typeof winRules](player)]
                 }
                 state.players[i].strategy = strategy
+                state.players[i].cards.sort((a, b) => a.num - b.num)
             }
             // console.log(JSON.parse(JSON.stringify(state.players)))
         },

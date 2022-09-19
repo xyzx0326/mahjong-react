@@ -11,10 +11,9 @@ import {BrowserRouter, Route, Routes} from "react-router-dom";
 import './index.css'
 
 // const url = "127.0.0.1:8888";
-const url = "192.168.144.176:8888";
-
+// const url = "192.168.144.176:8888";
 // const url = "10.21.102.209:8888";
-// const url = "game.congeer.com";
+const url = "game.congeer.com";
 const dispatch = store.dispatch;
 configClient("ws://" + url + "/game/ws", {
     maxPlayer: 4,

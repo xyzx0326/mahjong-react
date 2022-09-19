@@ -102,6 +102,7 @@ const Game: React.FC<GameProps> = ({
                     {select ?
                         <Group
                             height={boardSize.cardHeight}
+                            y={-boardSize.cardHeight}
                             width={opWidth}
                             fill={"#fff"}
                         >
@@ -124,7 +125,8 @@ const Game: React.FC<GameProps> = ({
                                               verticalAlign={"middle"}
                                               fill={"#fff"} width={scaleCard.cardWidth}
                                               align={"center"}
-                                              text={`余${4 - outerMap[v.card]}`}/>
+                                              fontSize={scaleCard.cardHeight * 0.3}
+                                              text={`余${4 - (outerMap[v.card] ? outerMap[v.card] : 0)}`}/>
                                     </Group>
                                 }
                             )}

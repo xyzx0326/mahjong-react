@@ -135,7 +135,7 @@ const Play = () => {
                 }
             })
         }
-        if (winSelf) {
+        if (winSelf && !self.select) {
             ops = [{
                 text: "自摸", op: () => {
                     remoteGo(handleWin({index: game.selfIndex, type: "self"}))
