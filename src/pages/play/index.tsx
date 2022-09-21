@@ -111,7 +111,7 @@ const Play = () => {
                 }
             })
         }
-        if (quadrupleSelf.length > 0) {
+        if (quadrupleSelf.length > 0 && !self.select) {
             quadrupleSelf.forEach(q => {
                 if (q.extra) {
                     ops.push({
