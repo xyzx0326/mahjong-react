@@ -3,12 +3,12 @@ import {Home, Play} from "@/pages";
 import {store} from "@/stores";
 import {handleRestart, startRound, updateRule, updateSelfIndex} from "@/stores/game";
 import {CACHE_RULE_KEY, CacheUtils} from "@/utils";
-import {configClient, SeedData} from "game-react";
+import {configClient, SeedData} from "@illuxiza/one-client";
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import {Provider} from "react-redux";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import './index.css'
+import '@illuxiza/one-client-react/index.scss';
 
 // const url = "127.0.0.1:8888";
 // const url = "192.168.144.176:8888";
@@ -18,16 +18,17 @@ const dispatch = store.dispatch;
 configClient("ws://" + url + "/game/ws", {
     maxPlayer: 4,
     baseConfig: [
-        updateRule(CacheUtils.getItem(CACHE_RULE_KEY, defaultRule))
+        JSON.stringify(updateRule(CacheUtils.getItem(CACHE_RULE_KEY, defaultRule)))
     ],
+    debug: true,
     playerConfig: [
-        [updateSelfIndex(0)],
-        [updateSelfIndex(1)],
-        [updateSelfIndex(2)],
-        [updateSelfIndex(3)]
+        [JSON.stringify(updateSelfIndex(0))],
+        [JSON.stringify(updateSelfIndex(1))],
+        [JSON.stringify(updateSelfIndex(2))],
+        [JSON.stringify(updateSelfIndex(3))]
     ],
     onConfig: dispatch,
-    onAction: dispatch,
+    onFrame: dispatch,
     onReset: () => dispatch(handleRestart()),
     onSeed: (data: SeedData) => {
         if (data.code === "main") {

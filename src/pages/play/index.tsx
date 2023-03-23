@@ -13,7 +13,8 @@ import {
     handleWin,
     Player
 } from "@/stores/game";
-import {addRoom, leaveRoom, resetRoom, seedCreate, useOnline} from 'game-react';
+import {addRoom, leaveRoom, resetRoom, seedCreate} from '@illuxiza/one-client';
+import {useOnline} from "@illuxiza/one-client-react";
 import React from 'react';
 import {useParams} from "react-router-dom";
 import {useMount} from "react-use";

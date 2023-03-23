@@ -1,4 +1,4 @@
-import {sendAction} from "game-react";
+import {sendFrame} from "@illuxiza/one-client";
 
 import {useGo} from "./index";
 
@@ -8,9 +8,9 @@ export const useRemoteGo = (mode?: string) => {
         go(action)
         if (mode && mode === 'remote') {
             if (typeof action === 'function') {
-                action(sendAction)
+                action(sendFrame)
             } else {
-                sendAction(action)
+                sendFrame(action)
             }
         }
     };
